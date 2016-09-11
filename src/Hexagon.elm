@@ -6,6 +6,7 @@ import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Html.Attributes exposing (class, rel, href)
 
+
 type alias Coord =
     (Float, Float)
 
