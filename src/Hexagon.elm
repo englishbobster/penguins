@@ -11,12 +11,17 @@ type alias Coord =
 
 view : Html Cmd
 view =
-    div [] [ hexagon (10, 10) 5 ]
+    div [] [ hexagon (60, 60) 50 "blue" ]
 
 
-hexagon : Coord -> Float -> Svg Cmd
-hexagon center size =
-    Svg.svg [] [ polygon [points ( hexagonPoints center size )] [] ]
+hexColour: String -> Svg.Attribute msg
+hexColour colour =
+    Svg.Attributes.style ( "fill:" ++ colour ++ ";stroke:black;stroke-width:3" )
+
+
+hexagon : Coord -> Float -> String -> Svg Cmd
+hexagon center size colour =
+    Svg.svg [] [ polygon [points ( hexagonPoints center size ), hexColour colour] [] ]
 
 
 hexCorner : Coord -> Float -> Int -> Coord
@@ -37,4 +42,4 @@ hexagonPoints center size =
 
 main : Html Cmd
 main =
-    hexagon (50, 50) 50
+    view
