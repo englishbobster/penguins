@@ -4,15 +4,33 @@ import String exposing (..)
 import Html exposing (..)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
+import Html.Attributes exposing (class, rel, href)
 
 type alias Coord =
     (Float, Float)
 
 
+css : String -> Html Cmd
+css path =
+  Html.node "link" [ rel "stylesheet", href path ] []
+
+
 view : Html Cmd
 view =
-    div [] [ hexagon (60, 60) 50 "blue" ]
+    div [] [ css "../flip.css"
+           , flipper
+           ]
 
+flipper : Html Cmd
+flipper =
+    div [ Html.Attributes.class "flip-container" ]
+        [ div [ Html.Attributes.class "flipper" ]
+              [ div [ Html.Attributes.class "front" ]
+                    [ hexagon (60, 60) 50 "blue" ]
+              , div [ Html.Attributes.class "back" ]
+                    [ hexagon (60, 60) 50 "red" ]
+              ]
+        ]
 
 hexColour: String -> Svg.Attribute msg
 hexColour colour =
