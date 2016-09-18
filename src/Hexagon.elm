@@ -42,7 +42,7 @@ hexagonFace center size colour =
 
 hexColour: String -> Svg.Attribute msg
 hexColour colour =
-    Svg.Attributes.style ( "fill:" ++ colour ++ ";stroke:black;stroke-width:3" )
+    Svg.Attributes.style ( "fill:" ++ colour ++ ";stroke:black;stroke-width:6" )
 
 
 hexagonPoints : Coord -> Float -> String
@@ -59,3 +59,7 @@ hexCorner center size cornerIndex =
         angleRad = Basics.degrees (60 * (Basics.toFloat cornerIndex) + 60)
     in
         (Basics.fst center + size * (cos angleRad), Basics.snd center + size *(sin angleRad))
+
+
+main =
+    drawHexagon (60,60) 50 "yellow" "red"
