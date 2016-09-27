@@ -7,6 +7,7 @@ import Html.App as App
 import String exposing (join)
 import Time exposing (Time, inSeconds, now)
 import Task exposing (perform)
+import Random exposing (int, step, initialSeed)
 
 
 type alias AxialCoords =
@@ -33,12 +34,12 @@ emptyTile =
 
 
 type alias Model =
-    Map
+    HexTile
 
 
 initialModel : Model
 initialModel =
-    Dict.empty
+    emptyTile
 
 
 type Msg
@@ -53,7 +54,7 @@ update msg model =
             ( model, Cmd.none )
 
         SeedWith now ->
-            ( model, Cmd.none )
+            ( { model | fish = (randomizeFish (timeInSeconds now)) }, Cmd.none )
 
 
 timeInSeconds : Time -> Int
@@ -66,9 +67,13 @@ currentTime =
     perform (\_ -> NoOp) SeedWith now
 
 
-generateMap : Int -> Int -> Map
-generateMap height width =
-    insert ( 0, 0 ) (generateTile 0) empty
+randomizeFish : Int -> Int
+randomizeFish seed =
+    let
+        ( nrFish, newSeed ) =
+            Random.step (Random.int 1 5) (initialSeed seed)
+    in
+        nrFish
 
 
 generateMapKeys : Int -> Int -> List AxialCoords
@@ -108,19 +113,18 @@ convertFromEvenQToAxial ( col, row ) =
         ( x, z )
 
 
-generateTile : Int -> HexTile
-generateTile nrFish =
-    emptyTile
-
-
 view : Model -> Html Msg
 view model =
-    drawHexagon ( 60, 60 ) 50 "cyan" "yellow"
+    text mapKeysAsText
+
+
+
+--    drawHexagon ( 60, 60 ) 50 "cyan" "yellow"
 
 
 main =
     App.program
-        { init = ( initialModel, Cmd.none )
+        { init = ( initialModel, currentTime )
         , view = view
         , update = update
         , subscriptions = (\model -> Sub.none)
@@ -133,7 +137,8 @@ main =
 
 mapKeysAsText : String
 mapKeysAsText =
-    List.map (\( x, y ) -> "(" ++ (toString x) ++ "," ++ (toString y) ++ ")") (generateMapKeys 6 6)
+    generateMapKeys 6 6
+        |> List.map (\( x, y ) -> "(" ++ (toString x) ++ "," ++ (toString y) ++ ")")
         |> join " ,"
 
 
