@@ -2,7 +2,7 @@ module Penguins exposing (..)
 
 import Dict exposing (Dict, empty, insert)
 import Hexagon exposing (drawHexagon)
-import Html exposing (Html, text)
+import Html exposing (Html, text, div)
 import Html.App as App
 import String exposing (join)
 import Time exposing (Time, inSeconds, now)
@@ -28,7 +28,7 @@ type alias Map =
 emptyTile : HexTile
 emptyTile =
     { fish = 0
-    , flipped = True
+    , flipped = False
     , occupied = False
     }
 
@@ -115,7 +115,10 @@ convertFromEvenQToAxial ( col, row ) =
 
 view : Model -> Html Msg
 view model =
-    text mapKeysAsText
+    div []
+        [ div [] [ text mapKeysAsText ]
+        , div [] [ text (tileAsText model) ]
+        ]
 
 
 
@@ -140,6 +143,11 @@ mapKeysAsText =
     generateMapKeys 6 6
         |> List.map (\( x, y ) -> "(" ++ (toString x) ++ "," ++ (toString y) ++ ")")
         |> join " ,"
+
+
+tileAsText : HexTile -> String
+tileAsText tile =
+    toString tile
 
 
 
