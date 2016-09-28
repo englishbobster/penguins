@@ -54,21 +54,19 @@ update msg model =
             ( model, Cmd.none )
 
         GenerateBoard now ->
-            ( (Dict.insert ( 0, 0 ) (getHeadFromRandomList (timeInSeconds now)) model), Cmd.none )
+            ( (generateBoard now 10 10), Cmd.none )
 
 
-getHeadFromRandomList : Int -> HexTile
-getHeadFromRandomList seed =
+generateBoard : Time -> Int -> Int -> Model
+generateBoard timeAsSeed rows columns =
     let
-        nrFish =
-            randomizeFish seed 100
-                |> List.head
-                |> Maybe.withDefault 1
+        fishList =
+            randomizeFish (timeInSeconds timeAsSeed) (rows * columns)
 
-        newTile =
-            emptyTile
+        mapkeys =
+            generateMapKeys rows columns
     in
-        { newTile | fish = nrFish }
+        List.map2 (\k v -> ( k, { emptyTile | fish = v } )) mapkeys fishList |> Dict.fromList
 
 
 timeInSeconds : Time -> Int
@@ -82,10 +80,10 @@ currentTime =
 
 
 randomizeFish : Int -> Int -> List Int
-randomizeFish seed sizeOfList =
+randomizeFish seed listSize =
     let
         ( nrFish, newSeed ) =
-            Random.step (Random.list sizeOfList (Random.int 1 5)) (initialSeed seed)
+            Random.step (Random.list listSize (Random.int 1 5)) (initialSeed seed)
     in
         nrFish
 
@@ -130,8 +128,7 @@ convertFromEvenQToAxial ( col, row ) =
 view : Model -> Html Msg
 view model =
     div []
-        [ div [] [ text mapKeysAsText ]
-        , div [] [ text (modelAsText model) ]
+        [ div [] [ text (modelAsText model) ]
         ]
 
 
@@ -152,16 +149,9 @@ main =
 --test code start
 
 
-mapKeysAsText : String
-mapKeysAsText =
-    generateMapKeys 6 6
-        |> List.map (\( x, y ) -> "(" ++ (toString x) ++ "," ++ (toString y) ++ ")")
-        |> join " ,"
-
-
 modelAsText : Model -> String
 modelAsText model =
-    toString (Dict.values model)
+    List.map2 (\k v -> ( k, v )) (Dict.keys model) (Dict.values model) |> toString
 
 
 
