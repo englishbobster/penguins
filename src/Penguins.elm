@@ -34,17 +34,17 @@ emptyTile =
 
 
 type alias Model =
-    HexTile
+    Map
 
 
 initialModel : Model
 initialModel =
-    emptyTile
+    Dict.empty
 
 
 type Msg
     = NoOp
-    | SeedWith Time
+    | GenerateBoard Time
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -53,15 +53,22 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
-        SeedWith now ->
-            ( { model | fish = getFirstFromRandomList (timeInSeconds now) }, Cmd.none )
+        GenerateBoard now ->
+            ( (Dict.insert ( 0, 0 ) (getHeadFromRandomList (timeInSeconds now)) model), Cmd.none )
 
 
-getFirstFromRandomList : Int -> Int
-getFirstFromRandomList seed =
-    randomizeFish seed 100
-        |> List.head
-        |> Maybe.withDefault 1
+getHeadFromRandomList : Int -> HexTile
+getHeadFromRandomList seed =
+    let
+        nrFish =
+            randomizeFish seed 100
+                |> List.head
+                |> Maybe.withDefault 1
+
+        newTile =
+            emptyTile
+    in
+        { newTile | fish = nrFish }
 
 
 timeInSeconds : Time -> Int
@@ -71,7 +78,7 @@ timeInSeconds time =
 
 currentTime : Cmd Msg
 currentTime =
-    perform (\_ -> NoOp) SeedWith now
+    perform (\_ -> NoOp) GenerateBoard now
 
 
 randomizeFish : Int -> Int -> List Int
@@ -124,7 +131,7 @@ view : Model -> Html Msg
 view model =
     div []
         [ div [] [ text mapKeysAsText ]
-        , div [] [ text (tileAsText model) ]
+        , div [] [ text (modelAsText model) ]
         ]
 
 
@@ -152,9 +159,9 @@ mapKeysAsText =
         |> join " ,"
 
 
-tileAsText : HexTile -> String
-tileAsText tile =
-    toString tile
+modelAsText : Model -> String
+modelAsText model =
+    toString (Dict.values model)
 
 
 
