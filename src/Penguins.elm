@@ -54,7 +54,14 @@ update msg model =
             ( model, Cmd.none )
 
         SeedWith now ->
-            ( { model | fish = (randomizeFish (timeInSeconds now)) }, Cmd.none )
+            ( { model | fish = getFirstFromRandomList (timeInSeconds now) }, Cmd.none )
+
+
+getFirstFromRandomList : Int -> Int
+getFirstFromRandomList seed =
+    randomizeFish seed 100
+        |> List.head
+        |> Maybe.withDefault 1
 
 
 timeInSeconds : Time -> Int
@@ -67,11 +74,11 @@ currentTime =
     perform (\_ -> NoOp) SeedWith now
 
 
-randomizeFish : Int -> Int
-randomizeFish seed =
+randomizeFish : Int -> Int -> List Int
+randomizeFish seed sizeOfList =
     let
         ( nrFish, newSeed ) =
-            Random.step (Random.int 1 5) (initialSeed seed)
+            Random.step (Random.list sizeOfList (Random.int 1 5)) (initialSeed seed)
     in
         nrFish
 
