@@ -38,7 +38,7 @@ hexagonFlipper center size frontColour backColour =
 
 hexagonFace : Coord -> Float -> String -> Svg msg
 hexagonFace center size colour =
-    Svg.svg [] [ polygon [ points (hexagonPoints center size), hexColour colour ] [] ]
+    polygon [ points (hexagonPoints center size), hexColour colour ] []
 
 
 hexColour : String -> Svg.Attribute msg

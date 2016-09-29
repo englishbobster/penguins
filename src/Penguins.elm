@@ -3,7 +3,10 @@ module Penguins exposing (..)
 import Dict exposing (Dict, empty, insert)
 import Hexagon exposing (drawHexagon, hexagonFace)
 import Html exposing (Html, text, div)
+import Html.Attributes exposing (style)
 import Html.App as App
+import Svg exposing (Svg, polygon)
+import Svg.Attributes exposing (points)
 import String exposing (join)
 import Time exposing (Time, inSeconds, now)
 import Task exposing (perform)
@@ -58,7 +61,7 @@ update msg model =
             ( model, Cmd.none )
 
         GenerateBoard now ->
-            ( (generateBoard now 2 2), Cmd.none )
+            ( (generateBoard now 7 7), Cmd.none )
 
 
 generateBoard : Time -> Int -> Int -> Model
@@ -135,18 +138,30 @@ axialHexToPixel size ( r, q ) =
         floatSize =
             toFloat size
 
+        offset =
+            floatSize * 6
+
         x =
             floatSize * (3 / 2) * (toFloat q)
 
         y =
             floatSize * (sqrt 3) * ((toFloat r) + ((toFloat q) / 2))
     in
-        ( floatSize + x, floatSize + y )
+        ( offset + x, offset + y )
 
 
 view : Model -> Html msg
 view model =
-    div [] (createBoard model)
+    let
+        svgStyle =
+            style
+                [ ( "height", "1000px" )
+                , ( "width", "100%" )
+                ]
+    in
+        div
+            []
+            [ Svg.svg [ svgStyle ] (createBoard model) ]
 
 
 createBoard : Model -> List (Html msg)
