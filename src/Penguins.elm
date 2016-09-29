@@ -1,7 +1,7 @@
 module Penguins exposing (..)
 
 import Dict exposing (Dict, empty, insert)
-import Hexagon exposing (drawHexagon)
+import Hexagon exposing (drawHexagon, hexagonFace)
 import Html exposing (Html, text, div)
 import Html.App as App
 import String exposing (join)
@@ -15,7 +15,7 @@ type alias AxialCoords =
 
 
 type alias Point =
-    ( Int, Int )
+    ( Float, Float )
 
 
 type alias HexTile =
@@ -58,7 +58,7 @@ update msg model =
             ( model, Cmd.none )
 
         GenerateBoard now ->
-            ( (generateBoard now 10 10), Cmd.none )
+            ( (generateBoard now 2 2), Cmd.none )
 
 
 generateBoard : Time -> Int -> Int -> Model
@@ -130,23 +130,28 @@ convertFromEvenQToAxial ( col, row ) =
 
 
 axialHexToPixel : Int -> AxialCoords -> Point
-axialHexToPixel size ( q, r ) =
+axialHexToPixel size ( r, q ) =
     let
+        floatSize =
+            toFloat size
+
         x =
-            (toFloat size) * (3 / 2) * (toFloat q)
+            floatSize * (3 / 2) * (toFloat q)
 
         y =
-            (toFloat size) * (sqrt 3) * ((toFloat r) + ((toFloat q) / 2))
+            floatSize * (sqrt 3) * ((toFloat r) + ((toFloat q) / 2))
     in
-        ( (round x), (round y) )
+        ( floatSize + x, floatSize + y )
 
 
-view : Model -> Html Msg
+view : Model -> Html msg
 view model =
-    div []
-        [ div [] [ text (modelAsText model) ]
-        , drawHexagon ( 60, 60 ) 50 "cyan" "yellow"
-        ]
+    div [] (createBoard model)
+
+
+createBoard : Model -> List (Html msg)
+createBoard model =
+    List.map (\key -> hexagonFace (axialHexToPixel 50 key) 50 "blue") (Dict.keys model)
 
 
 main =

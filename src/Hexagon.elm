@@ -48,7 +48,7 @@ hexColour colour =
 
 hexagonPoints : Coord -> Float -> String
 hexagonPoints center size =
-    [ 0, 1, 2, 3, 4, 5 ]
+    [0..5]
         |> List.map (hexCorner center size)
         |> List.map (\( x, y ) -> toString (round x) ++ "," ++ toString (round y))
         |> join ","
