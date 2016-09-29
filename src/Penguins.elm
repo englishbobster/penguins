@@ -61,7 +61,7 @@ update msg model =
             ( model, Cmd.none )
 
         GenerateBoard now ->
-            ( (generateBoard now 7 7), Cmd.none )
+            ( (generateBoard now 10 10), Cmd.none )
 
 
 generateBoard : Time -> Int -> Int -> Model
@@ -133,13 +133,13 @@ convertFromEvenQToAxial ( col, row ) =
 
 
 axialHexToPixel : Int -> AxialCoords -> Point
-axialHexToPixel size ( r, q ) =
+axialHexToPixel size ( q, r ) =
     let
         floatSize =
             toFloat size
 
         offset =
-            floatSize * 6
+            floatSize * 2
 
         x =
             floatSize * (3 / 2) * (toFloat q)
