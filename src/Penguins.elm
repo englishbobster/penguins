@@ -14,6 +14,10 @@ type alias AxialCoords =
     ( Int, Int )
 
 
+type alias Point =
+    ( Int, Int )
+
+
 type alias HexTile =
     { fish : Int
     , flipped : Bool
@@ -125,15 +129,24 @@ convertFromEvenQToAxial ( col, row ) =
         ( x, z )
 
 
+axialHexToPixel : Int -> AxialCoords -> Point
+axialHexToPixel size ( q, r ) =
+    let
+        x =
+            (toFloat size) * (3 / 2) * (toFloat q)
+
+        y =
+            (toFloat size) * (sqrt 3) * ((toFloat r) + ((toFloat q) / 2))
+    in
+        ( (round x), (round y) )
+
+
 view : Model -> Html Msg
 view model =
     div []
         [ div [] [ text (modelAsText model) ]
+        , drawHexagon ( 60, 60 ) 50 "cyan" "yellow"
         ]
-
-
-
---    drawHexagon ( 60, 60 ) 50 "cyan" "yellow"
 
 
 main =
