@@ -1,9 +1,9 @@
 module Hexagon exposing (..)
 
 import String exposing (join)
-import Html exposing (Html, div)
-import Svg exposing (Svg, polygon)
-import Svg.Attributes exposing (points)
+import Html exposing (Html, text, div)
+import Svg exposing (Svg, text', polygon)
+import Svg.Attributes exposing (points, x, y, fontSize)
 import Html.Attributes exposing (class, rel, href)
 
 
@@ -29,16 +29,19 @@ hexagonFlipper center size frontColour backColour =
     div [ Html.Attributes.class "flip-container" ]
         [ div [ Html.Attributes.class "flipper" ]
             [ div [ Html.Attributes.class "front" ]
-                [ hexagonFace center size frontColour ]
+                [ hexagonFace center size frontColour 0 ]
             , div [ Html.Attributes.class "back" ]
-                [ hexagonFace center size backColour ]
+                [ hexagonFace center size backColour 0 ]
             ]
         ]
 
 
-hexagonFace : Coord -> Float -> String -> Svg msg
-hexagonFace center size colour =
-    polygon [ points (hexagonPoints center size), hexColour colour ] []
+hexagonFace : Coord -> Float -> String -> Int -> Html msg
+hexagonFace center size colour fish =
+    Svg.svg []
+        [ polygon [ points (hexagonPoints center size), hexColour colour ] []
+        , text' [ x (toString (fst center)), y (toString (snd center)), fontSize "20" ] [ text (toString fish) ]
+        ]
 
 
 hexColour : String -> Svg.Attribute msg

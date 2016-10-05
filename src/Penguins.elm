@@ -167,20 +167,22 @@ axialHexToPixel size ( q, r ) =
 
 view : Model -> Html msg
 view model =
-    let
-        svgStyle =
-            [ height "1000"
-            , width "100%"
-            ]
-    in
-        div
-            []
-            [ Svg.svg svgStyle (drawBoard model.board) ]
+    div [] [ Svg.svg [ height "1000", width "100%" ] (drawBoard model.board) ]
 
 
 drawBoard : Board -> List (Html msg)
 drawBoard board =
-    List.map (\key -> hexagonFace (axialHexToPixel 50 key) 50 "blue") (Dict.keys board)
+    List.map (\key -> hexagonFace (axialHexToPixel 50 key) 50 "blue" (fishOnTile key board)) (Dict.keys board)
+
+
+fishOnTile : AxialCoords -> Board -> Int
+fishOnTile key board =
+    let
+        tile =
+            Dict.get key board
+                |> Maybe.withDefault emptyTile
+    in
+        tile.fish
 
 
 main =
