@@ -6,7 +6,7 @@ import Html exposing (Html, text, div)
 import Html.Attributes exposing (style)
 import Html.App as App
 import Svg exposing (Svg, polygon)
-import Svg.Attributes exposing (points)
+import Svg.Attributes exposing (points, viewBox, height, width, preserveAspectRatio)
 import String exposing (join)
 import Time exposing (Time, inSeconds, now)
 import Task exposing (perform)
@@ -28,8 +28,19 @@ type alias HexTile =
     }
 
 
-type alias Map =
+type alias Board =
     Dict AxialCoords HexTile
+
+
+type PlayerState
+    = NotOnBoard
+    | Placed Player
+
+
+type alias Player =
+    { currentPosition : AxialCoords
+    , score : Int
+    }
 
 
 emptyTile : HexTile
@@ -41,12 +52,16 @@ emptyTile =
 
 
 type alias Model =
-    Map
+    { board : Board
+    , playerState : PlayerState
+    }
 
 
 initialModel : Model
 initialModel =
-    Dict.empty
+    { board = Dict.empty
+    , playerState = NotOnBoard
+    }
 
 
 type Msg
@@ -61,10 +76,10 @@ update msg model =
             ( model, Cmd.none )
 
         GenerateBoard now ->
-            ( (generateBoard now 10 10), Cmd.none )
+            ( { model | board = (generateBoard now 10 10) }, Cmd.none )
 
 
-generateBoard : Time -> Int -> Int -> Model
+generateBoard : Time -> Int -> Int -> Board
 generateBoard timeAsSeed rows columns =
     let
         fishList =
@@ -154,19 +169,18 @@ view : Model -> Html msg
 view model =
     let
         svgStyle =
-            style
-                [ ( "height", "1000px" )
-                , ( "width", "100%" )
-                ]
+            [ height "1000"
+            , width "100%"
+            ]
     in
         div
             []
-            [ Svg.svg [ svgStyle ] (createBoard model) ]
+            [ Svg.svg svgStyle (drawBoard model.board) ]
 
 
-createBoard : Model -> List (Html msg)
-createBoard model =
-    List.map (\key -> hexagonFace (axialHexToPixel 50 key) 50 "blue") (Dict.keys model)
+drawBoard : Board -> List (Html msg)
+drawBoard board =
+    List.map (\key -> hexagonFace (axialHexToPixel 50 key) 50 "blue") (Dict.keys board)
 
 
 main =
@@ -184,7 +198,7 @@ main =
 
 modelAsText : Model -> String
 modelAsText model =
-    List.map2 (\k v -> ( k, v )) (Dict.keys model) (Dict.values model) |> toString
+    List.map2 (\k v -> ( k, v )) (Dict.keys model.board) (Dict.values model.board) |> toString
 
 
 
