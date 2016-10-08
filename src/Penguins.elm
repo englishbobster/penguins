@@ -5,8 +5,8 @@ import Hexagon exposing (drawHexagon, hexagonFace)
 import Html exposing (Html, text, div)
 import Html.Attributes exposing (style)
 import Html.App as App
-import Svg exposing (Svg, polygon)
-import Svg.Attributes exposing (points, viewBox, height, width, preserveAspectRatio)
+import Svg exposing (Svg, polygon, image)
+import Svg.Attributes exposing (points, viewBox, x, y, height, width, preserveAspectRatio, xlinkHref)
 import String exposing (join)
 import Time exposing (Time, inSeconds, now)
 import Task exposing (perform)
@@ -167,10 +167,13 @@ axialHexToPixel size ( q, r ) =
 
 view : Model -> Html msg
 view model =
-    div [] [ Svg.svg [ height "1000", width "100%" ] (drawBoard model.board) ]
+    div []
+        [ Svg.svg [ height "1000", width "100%" ]
+            ((drawBoard model.board) ++ [ Svg.image [ x "60", y "60", height "50", width "50", xlinkHref "../graphics/pengmaru.svg" ] [] ])
+        ]
 
 
-drawBoard : Board -> List (Html msg)
+drawBoard : Board -> List (Svg msg)
 drawBoard board =
     List.map (\key -> hexagonFace (axialHexToPixel 50 key) 50 "blue" (fishOnTile key board)) (Dict.keys board)
 
