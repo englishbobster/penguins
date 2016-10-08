@@ -11,6 +11,10 @@ import String exposing (join)
 import Time exposing (Time, inSeconds, now)
 import Task exposing (perform)
 import Random exposing (int, step, initialSeed)
+import Mouse exposing (Position, clicks)
+
+
+--Model
 
 
 type alias AxialCoords =
@@ -54,6 +58,7 @@ emptyTile =
 type alias Model =
     { board : Board
     , playerState : PlayerState
+    , postest : Position
     }
 
 
@@ -61,12 +66,21 @@ initialModel : Model
 initialModel =
     { board = Dict.empty
     , playerState = NotOnBoard
+    , postest =
+        { x = 0
+        , y = 0
+        }
     }
 
 
 type Msg
     = NoOp
     | GenerateBoard Time
+    | MousePos Position
+
+
+
+-- Update
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -77,6 +91,9 @@ update msg model =
 
         GenerateBoard now ->
             ( { model | board = (generateBoard now 10 10) }, Cmd.none )
+
+        MousePos pos ->
+            ( { model | postest = pos }, Cmd.none )
 
 
 generateBoard : Time -> Int -> Int -> Board
@@ -165,10 +182,17 @@ axialHexToPixel size ( q, r ) =
         ( offset + x, offset + y )
 
 
+
+-- View
+
+
 view : Model -> Html msg
 view model =
     div []
-        [ Svg.svg [ height "1000", width "100%" ]
+        [ div []
+            [ text (toString model.postest) ]
+        , Svg.svg
+            [ height "1000", width "100%" ]
             ((drawBoard model.board) ++ [ Svg.image [ x "60", y "60", height "50", width "50", xlinkHref "../graphics/pengmaru.svg" ] [] ])
         ]
 
@@ -188,12 +212,25 @@ fishOnTile key board =
         tile.fish
 
 
+
+-- Subscriptions
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    clicks MousePos
+
+
+
+-- Main
+
+
 main =
     App.program
         { init = ( initialModel, currentTime )
         , view = view
         , update = update
-        , subscriptions = (\model -> Sub.none)
+        , subscriptions = subscriptions
         }
 
 
