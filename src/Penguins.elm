@@ -193,8 +193,20 @@ view model =
             [ text (toString model.postest) ]
         , Svg.svg
             [ height "1000", width "100%" ]
-            ((drawBoard model.board) ++ [ Svg.image [ x "60", y "60", height "50", width "50", xlinkHref "../graphics/pengmaru.svg" ] [] ])
+            ((drawBoard model.board) ++ [ Svg.image (placePlayer model.postest) [] ])
         ]
+
+
+placePlayer : Position -> List (Svg.Attribute msg)
+placePlayer pos =
+    let
+        xpos =
+            x (toString (pos.x - 25))
+
+        ypos =
+            y (toString (pos.y - 25))
+    in
+        [ xpos, ypos, height "50", width "50", xlinkHref "../graphics/pengmaru.svg" ]
 
 
 drawBoard : Board -> List (Svg msg)
