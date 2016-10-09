@@ -182,6 +182,50 @@ axialHexToPixel size ( q, r ) =
         ( offset + x, offset + y )
 
 
+pixelToAxialHex : Int -> Point -> AxialCoords
+pixelToAxialHex size ( x, y ) =
+    let
+        q =
+            (x * 2 / 3) / (toFloat size)
+
+        r =
+            ((-x / 3) + (((sqrt 3) / 3) * y)) / (toFloat size)
+    in
+        roundAxialHex ( q, r )
+
+
+roundAxialHex : ( Float, Float ) -> AxialCoords
+roundAxialHex ( x, y ) =
+    let
+        z =
+            0 - x - y
+
+        rx =
+            round x
+
+        ry =
+            round y
+
+        rz =
+            round (0 - x - y)
+
+        xdiff =
+            abs ((toFloat rx) - x)
+
+        ydiff =
+            abs ((toFloat ry) - y)
+
+        zdiff =
+            abs ((toFloat rz) - z)
+    in
+        if xdiff > ydiff && xdiff > zdiff then
+            ( (0 - ry - rz), ry )
+        else if ydiff > zdiff then
+            ( rx, (0 - rx - rz) )
+        else
+            ( rx, ry )
+
+
 
 -- View
 
