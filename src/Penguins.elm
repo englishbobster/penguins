@@ -103,7 +103,7 @@ update msg model =
             ( { model | board = (generateBoard now const.boardSize) }, Cmd.none )
 
         MousePos pos ->
-            ( model, Cmd.none )
+            ( { model | playerState = Placed { currentPosition = ( pos.x, pos.y ), score = 0 } }, Cmd.none )
 
 
 generateBoard : Time -> ( Int, Int ) -> Board
@@ -242,11 +242,20 @@ roundAxialHex ( x, y ) =
 
 view : Model -> Html msg
 view model =
-    div []
-        [ Svg.svg
-            [ height "1000", width "100%" ]
-            ((drawBoard model.board) ++ [ Svg.image (placePlayer { x = 100, y = 100 }) [] ])
-        ]
+    let
+        playerPenguin =
+            case model.playerState of
+                NotOnBoard ->
+                    []
+
+                Placed player ->
+                    [ Svg.image (placePlayer { x = (fst player.currentPosition), y = (snd player.currentPosition) }) [] ]
+    in
+        div []
+            [ Svg.svg
+                [ height "1000", width "100%" ]
+                ((drawBoard model.board) ++ playerPenguin)
+            ]
 
 
 placePlayer : Position -> List (Svg.Attribute msg)
@@ -258,7 +267,7 @@ placePlayer pos =
         ypos =
             y (toString (pos.y - const.playerSvgOffset))
     in
-        [ xpos, ypos, height "50", width "50", xlinkHref "../graphics/pengmaru.svg" ]
+        [ xpos, ypos, height "50", width "50", xlinkHref "../graphics/batzmaru.svg" ]
 
 
 drawBoard : Board -> List (Svg msg)
