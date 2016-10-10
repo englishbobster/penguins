@@ -17,6 +17,21 @@ import Mouse exposing (Position, clicks)
 --Model
 
 
+type alias Constants =
+    { boardSize : ( Int, Int )
+    , playerSvgOffset : Int
+    , hexagonSize : Float
+    }
+
+
+const : Constants
+const =
+    { boardSize = ( 10, 10 )
+    , playerSvgOffset = 25
+    , hexagonSize = 50.0
+    }
+
+
 type alias AxialCoords =
     ( Int, Int )
 
@@ -58,7 +73,6 @@ emptyTile =
 type alias Model =
     { board : Board
     , playerState : PlayerState
-    , postest : Position
     }
 
 
@@ -66,10 +80,6 @@ initialModel : Model
 initialModel =
     { board = Dict.empty
     , playerState = NotOnBoard
-    , postest =
-        { x = 0
-        , y = 0
-        }
     }
 
 
@@ -90,14 +100,14 @@ update msg model =
             ( model, Cmd.none )
 
         GenerateBoard now ->
-            ( { model | board = (generateBoard now 10 10) }, Cmd.none )
+            ( { model | board = (generateBoard now const.boardSize) }, Cmd.none )
 
         MousePos pos ->
-            ( { model | postest = pos }, Cmd.none )
+            ( model, Cmd.none )
 
 
-generateBoard : Time -> Int -> Int -> Board
-generateBoard timeAsSeed rows columns =
+generateBoard : Time -> ( Int, Int ) -> Board
+generateBoard timeAsSeed ( rows, columns ) =
     let
         fishList =
             randomizeFish (timeInSeconds timeAsSeed) (rows * columns)
@@ -164,11 +174,11 @@ convertFromEvenQToAxial ( col, row ) =
         ( x, z )
 
 
-axialHexToPixel : Int -> AxialCoords -> Point
+axialHexToPixel : Float -> AxialCoords -> Point
 axialHexToPixel size ( q, r ) =
     let
         floatSize =
-            toFloat size
+            const.hexagonSize
 
         offset =
             floatSize * 2
@@ -191,7 +201,7 @@ pixelToAxialHex size ( x, y ) =
         r =
             ((-x / 3) + (((sqrt 3) / 3) * y)) / (toFloat size)
     in
-        roundAxialHex ( q, r )
+        ( q, r ) |> roundAxialHex
 
 
 roundAxialHex : ( Float, Float ) -> AxialCoords
@@ -233,11 +243,9 @@ roundAxialHex ( x, y ) =
 view : Model -> Html msg
 view model =
     div []
-        [ div []
-            [ text (toString model.postest) ]
-        , Svg.svg
+        [ Svg.svg
             [ height "1000", width "100%" ]
-            ((drawBoard model.board) ++ [ Svg.image (placePlayer model.postest) [] ])
+            ((drawBoard model.board) ++ [ Svg.image (placePlayer { x = 100, y = 100 }) [] ])
         ]
 
 
@@ -245,17 +253,17 @@ placePlayer : Position -> List (Svg.Attribute msg)
 placePlayer pos =
     let
         xpos =
-            x (toString (pos.x - 25))
+            x (toString (pos.x - const.playerSvgOffset))
 
         ypos =
-            y (toString (pos.y - 25))
+            y (toString (pos.y - const.playerSvgOffset))
     in
         [ xpos, ypos, height "50", width "50", xlinkHref "../graphics/pengmaru.svg" ]
 
 
 drawBoard : Board -> List (Svg msg)
 drawBoard board =
-    List.map (\key -> hexagonFace (axialHexToPixel 50 key) 50 "blue" (fishOnTile key board)) (Dict.keys board)
+    List.map (\key -> hexagonFace (axialHexToPixel const.hexagonSize key) const.hexagonSize "blue" (fishOnTile key board)) (Dict.keys board)
 
 
 fishOnTile : AxialCoords -> Board -> Int
