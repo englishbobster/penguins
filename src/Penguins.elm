@@ -1,7 +1,7 @@
 module Penguins exposing (..)
 
 import Dict exposing (Dict, empty, insert)
-import Hexagon exposing (drawHexagon, hexagonFace)
+import Hexagon exposing (hexagonFace)
 import Html exposing (Html, text, div)
 import Html.Attributes exposing (style)
 import Html.App as App
@@ -20,7 +20,7 @@ import Mouse exposing (Position, clicks)
 type alias Constants =
     { boardSize : ( Int, Int )
     , playerSvgOffset : Int
-    , hexagonSize : Float
+    , hexagonSize : Int
     }
 
 
@@ -28,7 +28,7 @@ const : Constants
 const =
     { boardSize = ( 10, 10 )
     , playerSvgOffset = 25
-    , hexagonSize = 50.0
+    , hexagonSize = 50
     }
 
 
@@ -174,20 +174,17 @@ convertFromEvenQToAxial ( col, row ) =
         ( x, z )
 
 
-axialHexToPixel : Float -> AxialCoords -> Point
+axialHexToPixel : Int -> AxialCoords -> Point
 axialHexToPixel size ( q, r ) =
     let
-        floatSize =
-            const.hexagonSize
-
         offset =
-            floatSize * 2
+            (toFloat (size * 2))
 
         x =
-            floatSize * (3 / 2) * (toFloat q)
+            (toFloat size) * (3 / 2) * (toFloat q)
 
         y =
-            floatSize * (sqrt 3) * ((toFloat r) + ((toFloat q) / 2))
+            (toFloat size) * (sqrt 3) * ((toFloat r) + ((toFloat q) / 2))
     in
         ( offset + x, offset + y )
 
@@ -275,14 +272,14 @@ drawBoard board =
     List.map (\key -> hexagonFace (axialHexToPixel const.hexagonSize key) const.hexagonSize "blue" (fishOnTile key board)) (Dict.keys board)
 
 
-fishOnTile : AxialCoords -> Board -> Int
-fishOnTile key board =
+fishOnTile : AxialCoords -> Board -> String
+fishOnTile k board =
     let
         tile =
-            Dict.get key board
+            Dict.get k board
                 |> Maybe.withDefault emptyTile
     in
-        tile.fish
+        toString tile.fish
 
 
 

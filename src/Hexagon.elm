@@ -1,66 +1,70 @@
-module Hexagon exposing (..)
+module Hexagon exposing (hexagonFace)
 
 import String exposing (join)
-import Html exposing (Html, text, div)
-import Svg exposing (Svg, text', polygon)
-import Svg.Attributes exposing (points, x, y, fontSize)
-import Html.Attributes exposing (class, rel, href)
+import Svg exposing (Svg, svg, text', text, polygon)
+import Svg.Attributes exposing (style, points, x, y, fontSize, dy)
 
 
 type alias Coord =
     ( Float, Float )
 
 
-drawHexagon : Coord -> Float -> String -> String -> Html msg
-drawHexagon center size frontColour backColour =
-    div []
-        [ css "../flip.css"
-        , hexagonFlipper center size frontColour backColour
-        ]
-
-
-css : String -> Html msg
-css path =
-    Html.node "link" [ rel "stylesheet", href path ] []
-
-
-hexagonFlipper : Coord -> Float -> String -> String -> Html msg
-hexagonFlipper center size frontColour backColour =
-    div [ Html.Attributes.class "flip-container" ]
-        [ div [ Html.Attributes.class "flipper" ]
-            [ div [ Html.Attributes.class "front" ]
-                [ hexagonFace center size frontColour 0 ]
-            , div [ Html.Attributes.class "back" ]
-                [ hexagonFace center size backColour 0 ]
-            ]
-        ]
-
-
-hexagonFace : Coord -> Float -> String -> Int -> Html msg
-hexagonFace center size colour fish =
-    Svg.svg []
+hexagonFace : Coord -> Int -> String -> String -> Svg msg
+hexagonFace center size colour label =
+    svg []
         [ polygon [ points (hexagonPoints center size), hexColour colour ] []
-        , text' [ x (toString (fst center)), y (toString (snd center)), fontSize "20" ] [ text (toString fish) ]
+        , hexagonLabel center label
         ]
+
+
+hexagonLabel : Coord -> String -> Svg msg
+hexagonLabel center label =
+    let
+        ( xcenter, ycenter ) =
+            center
+
+        attributeList =
+            [ x (toString xcenter)
+            , y (toString ycenter)
+            , fontSize "48px"
+            , dy "+15px"
+            , style
+                ("text-anchor:middle;"
+                    ++ "font-family:Arial;"
+                    ++ "stroke:black;"
+                    ++ "stroke-width:2;"
+                    ++ "fill:white"
+                )
+            ]
+    in
+        text' attributeList [ text label ]
 
 
 hexColour : String -> Svg.Attribute msg
 hexColour colour =
-    Svg.Attributes.style ("fill:" ++ colour ++ ";stroke:black;stroke-width:6")
+    style
+        ("fill:"
+            ++ colour
+            ++ ";stroke:black;"
+            ++ "stroke-width:6"
+        )
 
 
-hexagonPoints : Coord -> Float -> String
+hexagonPoints : Coord -> Int -> String
 hexagonPoints center size =
     [0..5]
-        |> List.map (hexCorner center size)
+        |> List.map (hexagonCorner center size)
         |> List.map (\( x, y ) -> toString (round x) ++ "," ++ toString (round y))
         |> join ","
 
 
-hexCorner : Coord -> Float -> Int -> Coord
-hexCorner center size cornerIndex =
+hexagonCorner : Coord -> Int -> Int -> Coord
+hexagonCorner center size cornerIndex =
     let
         angleRad =
-            Basics.degrees (60 * (Basics.toFloat cornerIndex) + 60)
+            Basics.degrees (60 * (toFloat cornerIndex))
+
+        ( x, y ) =
+            center
     in
-        ( Basics.fst center + size * (cos angleRad), Basics.snd center + size * (sin angleRad) )
+        ( x + (toFloat size) * (cos angleRad), y + (toFloat size) * (sin angleRad) )
