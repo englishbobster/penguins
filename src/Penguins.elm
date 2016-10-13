@@ -6,7 +6,17 @@ import Html exposing (Html, text, div)
 import Html.Attributes exposing (style)
 import Html.App as App
 import Svg exposing (Svg, polygon, image)
-import Svg.Attributes exposing (points, viewBox, x, y, height, width, preserveAspectRatio, xlinkHref)
+import Svg.Attributes
+    exposing
+        ( points
+        , viewBox
+        , x
+        , y
+        , height
+        , width
+        , preserveAspectRatio
+        , xlinkHref
+        )
 import String exposing (join)
 import Time exposing (Time, inSeconds, now)
 import Task exposing (perform)
@@ -20,7 +30,8 @@ import Mouse exposing (Position, clicks)
 type alias Constants =
     { boardSize : ( Int, Int )
     , playerSvgOffset : Int
-    , hexagonSize : Int
+    , hexSize : Int
+    , hexColour : String
     }
 
 
@@ -28,7 +39,8 @@ const : Constants
 const =
     { boardSize = ( 10, 10 )
     , playerSvgOffset = 25
-    , hexagonSize = 50
+    , hexSize = 50
+    , hexColour = "blue"
     }
 
 
@@ -103,7 +115,19 @@ update msg model =
             ( { model | board = (generateBoard now const.boardSize) }, Cmd.none )
 
         MousePos pos ->
-            ( { model | playerState = Placed { currentPosition = ( pos.x, pos.y ), score = 0 } }, Cmd.none )
+            ( { model
+                | playerState =
+                    Placed
+                        { currentPosition =
+                            pixelToAxialCoords const.hexSize
+                                ( toFloat pos.x
+                                , toFloat pos.y
+                                )
+                        , score = 0
+                        }
+              }
+            , Cmd.none
+            )
 
 
 generateBoard : Time -> ( Int, Int ) -> Board
@@ -174,8 +198,8 @@ convertFromEvenQToAxial ( col, row ) =
         ( x, z )
 
 
-axialHexToPixel : Int -> AxialCoords -> Point
-axialHexToPixel size ( q, r ) =
+axialCoordsToPixel : Int -> AxialCoords -> Point
+axialCoordsToPixel size ( q, r ) =
     let
         offset =
             (toFloat (size * 2))
@@ -189,8 +213,8 @@ axialHexToPixel size ( q, r ) =
         ( offset + x, offset + y )
 
 
-pixelToAxialHex : Int -> Point -> AxialCoords
-pixelToAxialHex size ( x, y ) =
+pixelToAxialCoords : Int -> Point -> AxialCoords
+pixelToAxialCoords size ( x, y ) =
     let
         q =
             (x * 2 / 3) / (toFloat size)
@@ -240,18 +264,25 @@ roundAxialHex ( x, y ) =
 view : Model -> Html msg
 view model =
     let
-        playerPenguin =
+        playerPosition =
             case model.playerState of
                 NotOnBoard ->
                     []
 
                 Placed player ->
-                    [ Svg.image (placePlayer { x = (fst player.currentPosition), y = (snd player.currentPosition) }) [] ]
+                    [ Svg.image
+                        (placePlayer
+                            { x = (fst player.currentPosition)
+                            , y = (snd player.currentPosition)
+                            }
+                        )
+                        []
+                    ]
     in
         div []
             [ Svg.svg
                 [ height "1000", width "100%" ]
-                ((drawBoard model.board) ++ playerPenguin)
+                ((drawBoard model.board) ++ playerPosition)
             ]
 
 
@@ -269,17 +300,22 @@ placePlayer pos =
 
 drawBoard : Board -> List (Svg msg)
 drawBoard board =
-    List.map (\key -> hexagonFace (axialHexToPixel const.hexagonSize key) const.hexagonSize "blue" (fishOnTile key board)) (Dict.keys board)
+    List.map (\key -> drawHexagon key (fishOnTile key board)) (Dict.keys board)
 
 
 fishOnTile : AxialCoords -> Board -> String
-fishOnTile k board =
+fishOnTile key board =
     let
         tile =
-            Dict.get k board
+            Dict.get key board
                 |> Maybe.withDefault emptyTile
     in
         toString tile.fish
+
+
+drawHexagon : AxialCoords -> String -> Svg msg
+drawHexagon coord fish =
+    hexagonFace (axialCoordsToPixel const.hexSize coord) const.hexSize const.hexColour fish
 
 
 
