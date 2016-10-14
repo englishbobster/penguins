@@ -29,7 +29,7 @@ import Mouse exposing (Position, clicks)
 
 type alias Constants =
     { boardSize : ( Int, Int )
-    , playerSvgOffset : Int
+    , playerSvgOffset : Float
     , hexSize : Int
     , hexColour : String
     }
@@ -216,11 +216,20 @@ axialCoordsToPixel size ( q, r ) =
 pixelToAxialCoords : Int -> Point -> AxialCoords
 pixelToAxialCoords size ( x, y ) =
     let
+        offset =
+            (toFloat (size * 2))
+
+        ox =
+            x - offset
+
+        oy =
+            y - offset
+
         q =
-            (x * 2 / 3) / (toFloat size)
+            (ox * 2 / 3) / (toFloat size)
 
         r =
-            ((-x / 3) + (((sqrt 3) / 3) * y)) / (toFloat size)
+            ((-ox / 3) + (((sqrt 3) / 3) * oy)) / (toFloat size)
     in
         ( q, r ) |> roundAxialHex
 
@@ -272,9 +281,9 @@ view model =
                 Placed player ->
                     [ Svg.image
                         (placePlayer
-                            { x = (fst player.currentPosition)
-                            , y = (snd player.currentPosition)
-                            }
+                            ( (fst player.currentPosition)
+                            , (snd player.currentPosition)
+                            )
                         )
                         []
                     ]
@@ -286,14 +295,17 @@ view model =
             ]
 
 
-placePlayer : Position -> List (Svg.Attribute msg)
-placePlayer pos =
+placePlayer : AxialCoords -> List (Svg.Attribute msg)
+placePlayer coords =
     let
+        ( px, py ) =
+            axialCoordsToPixel const.hexSize coords
+
         xpos =
-            x (toString (pos.x - const.playerSvgOffset))
+            x (toString (px - const.playerSvgOffset))
 
         ypos =
-            y (toString (pos.y - const.playerSvgOffset))
+            y (toString (py - const.playerSvgOffset))
     in
         [ xpos, ypos, height "50", width "50", xlinkHref "../graphics/batzmaru.svg" ]
 
