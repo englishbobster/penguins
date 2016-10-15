@@ -141,11 +141,8 @@ updatePlayer model pos =
                         ( toFloat pos.x
                         , toFloat pos.y
                         )
-
-                coordList =
-                    Dict.keys model.board
             in
-                if List.member newPos coordList then
+                if (isTile model.board newPos) then
                     Placed
                         { lastPosition = ( oldx, oldy )
                         , currentPosition = newPos
@@ -153,6 +150,15 @@ updatePlayer model pos =
                         }
                 else
                     Placed player
+
+
+isTile : Board -> AxialCoords -> Bool
+isTile board coord =
+    let
+        coordList =
+            Dict.keys board
+    in
+        List.member coord coordList
 
 
 generateBoard : Time -> ( Int, Int ) -> Board
@@ -315,28 +321,24 @@ view model =
 
 onBoard : Model -> Player -> List (Svg msg)
 onBoard model player =
-    let
-        coordList =
-            Dict.keys model.board
-    in
-        if List.member player.currentPosition coordList then
-            [ Svg.image
-                (placePlayer
-                    ( (fst player.currentPosition)
-                    , (snd player.currentPosition)
-                    )
+    if (isTile model.board player.currentPosition) then
+        [ Svg.image
+            (placePlayer
+                ( (fst player.currentPosition)
+                , (snd player.currentPosition)
                 )
-                []
-            ]
-        else
-            [ Svg.image
-                (placePlayer
-                    ( (fst player.lastPosition)
-                    , (snd player.lastPosition)
-                    )
+            )
+            []
+        ]
+    else
+        [ Svg.image
+            (placePlayer
+                ( (fst player.lastPosition)
+                , (snd player.lastPosition)
                 )
-                []
-            ]
+            )
+            []
+        ]
 
 
 placePlayer : AxialCoords -> List (Svg.Attribute msg)
