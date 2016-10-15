@@ -69,7 +69,8 @@ type PlayerState
 
 
 type alias Player =
-    { currentPosition : AxialCoords
+    { lastPosition : AxialCoords
+    , currentPosition : AxialCoords
     , score : Int
     }
 
@@ -116,18 +117,44 @@ update msg model =
 
         MousePos pos ->
             ( { model
-                | playerState =
-                    Placed
-                        { currentPosition =
-                            pixelToAxialCoords const.hexSize
-                                ( toFloat pos.x
-                                , toFloat pos.y
-                                )
-                        , score = 0
-                        }
+                | playerState = updatePlayer model.playerState pos
               }
             , Cmd.none
             )
+
+
+updatePlayer : PlayerState -> Position -> PlayerState
+updatePlayer state pos =
+    case state of
+        NotOnBoard ->
+            Placed
+                { currentPosition =
+                    pixelToAxialCoords const.hexSize
+                        ( toFloat pos.x
+                        , toFloat pos.y
+                        )
+                , lastPosition = ( -100, -100 )
+                , score = 0
+                }
+
+        Placed player ->
+            let
+                ( oldx, oldy ) =
+                    player.currentPosition
+            in
+                Placed
+                    { lastPosition =
+                        pixelToAxialCoords const.hexSize
+                            ( toFloat oldx
+                            , toFloat oldy
+                            )
+                    , currentPosition =
+                        pixelToAxialCoords const.hexSize
+                            ( toFloat pos.x
+                            , toFloat pos.y
+                            )
+                    , score = 0
+                    }
 
 
 generateBoard : Time -> ( Int, Int ) -> Board
@@ -279,19 +306,38 @@ view model =
                     []
 
                 Placed player ->
-                    [ Svg.image
-                        (placePlayer
-                            ( (fst player.currentPosition)
-                            , (snd player.currentPosition)
-                            )
-                        )
-                        []
-                    ]
+                    onBoard model player
     in
         div []
             [ Svg.svg
                 [ height "1000", width "100%" ]
                 ((drawBoard model.board) ++ playerPosition)
+            ]
+
+
+onBoard : Model -> Player -> List (Svg msg)
+onBoard model player =
+    let
+        coordList =
+            Dict.keys model.board
+    in
+        if List.member player.currentPosition coordList then
+            [ Svg.image
+                (placePlayer
+                    ( (fst player.currentPosition)
+                    , (snd player.currentPosition)
+                    )
+                )
+                []
+            ]
+        else
+            [ Svg.image
+                (placePlayer
+                    ( (fst player.lastPosition)
+                    , (snd player.lastPosition)
+                    )
+                )
+                []
             ]
 
 
