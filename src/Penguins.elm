@@ -53,10 +53,7 @@ type alias Point =
 
 
 type alias HexTile =
-    { fish : Int
-    , flipped : Bool
-    , occupied : Bool
-    }
+    { fish : Int }
 
 
 type alias Board =
@@ -77,10 +74,7 @@ type alias Player =
 
 emptyTile : HexTile
 emptyTile =
-    { fish = 0
-    , flipped = False
-    , occupied = False
-    }
+    { fish = 0 }
 
 
 type alias Model =
@@ -117,15 +111,15 @@ update msg model =
 
         MousePos pos ->
             ( { model
-                | playerState = updatePlayer model.playerState pos
+                | playerState = updatePlayer model pos
               }
             , Cmd.none
             )
 
 
-updatePlayer : PlayerState -> Position -> PlayerState
-updatePlayer state pos =
-    case state of
+updatePlayer : Model -> Position -> PlayerState
+updatePlayer model pos =
+    case model.playerState of
         NotOnBoard ->
             Placed
                 { currentPosition =
@@ -141,20 +135,24 @@ updatePlayer state pos =
             let
                 ( oldx, oldy ) =
                     player.currentPosition
+
+                newPos =
+                    pixelToAxialCoords const.hexSize
+                        ( toFloat pos.x
+                        , toFloat pos.y
+                        )
+
+                coordList =
+                    Dict.keys model.board
             in
-                Placed
-                    { lastPosition =
-                        pixelToAxialCoords const.hexSize
-                            ( toFloat oldx
-                            , toFloat oldy
-                            )
-                    , currentPosition =
-                        pixelToAxialCoords const.hexSize
-                            ( toFloat pos.x
-                            , toFloat pos.y
-                            )
-                    , score = 0
-                    }
+                if List.member newPos coordList then
+                    Placed
+                        { lastPosition = ( oldx, oldy )
+                        , currentPosition = newPos
+                        , score = 0
+                        }
+                else
+                    Placed player
 
 
 generateBoard : Time -> ( Int, Int ) -> Board
