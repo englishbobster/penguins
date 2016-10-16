@@ -1,7 +1,7 @@
 module Penguins exposing (..)
 
 import Dict exposing (Dict, empty, insert)
-import Hexagon exposing (Msg(HighLight), HexModel, hexagonFace)
+import Hexagon exposing (Msg(HighLight), HexModel, hexagonFace, updateHex)
 import Html exposing (Html, text, div)
 import Html.Attributes exposing (style)
 import Html.App as App
@@ -72,8 +72,9 @@ emptyTile : HexModel
 emptyTile =
     { value = 0
     , border = "black"
-    , colour = "blue"
+    , colour = const.hexColour
     , size = const.hexSize
+    , center = ( 0, 0 )
     }
 
 
@@ -118,7 +119,15 @@ update msg model =
             )
 
         HexagonMsg hexmsg ->
-            ( model, Cmd.none )
+            let
+                listCenters =
+                    List.map
+                        (\tile ->
+                            pixelToAxialCoords const.hexSize tile.center
+                        )
+                        (Dict.values model.board)
+            in
+                ( model, Cmd.none )
 
 
 updatePlayer : Model -> Position -> PlayerState
@@ -174,7 +183,18 @@ generateBoard timeAsSeed ( rows, columns ) =
         mapkeys =
             generateMapKeys rows columns
     in
-        List.map2 (\k v -> ( k, { emptyTile | value = v } )) mapkeys fishList |> Dict.fromList
+        List.map2
+            (\k v ->
+                ( k
+                , { emptyTile
+                    | value = v
+                    , center = (axialCoordsToPixel const.hexSize k)
+                  }
+                )
+            )
+            mapkeys
+            fishList
+            |> Dict.fromList
 
 
 timeInSeconds : Time -> Int
@@ -362,33 +382,17 @@ placePlayer coords =
 
 drawBoard : Board -> List (Svg Msg)
 drawBoard board =
-    List.map (\key -> drawHexagon key (fishOnTile key board)) (Dict.keys board)
-
-
-fishOnTile : AxialCoords -> Board -> Int
-fishOnTile key board =
     let
-        tile =
-            Dict.get key board
+        getTile tileCoord =
+            Dict.get tileCoord board
                 |> Maybe.withDefault emptyTile
     in
-        tile.value
+        List.map (\key -> drawHexagon (getTile key)) (Dict.keys board)
 
 
-drawHexagon : AxialCoords -> Int -> Svg Msg
-drawHexagon coord fish =
-    let
-        pixelCoords =
-            axialCoordsToPixel const.hexSize coord
-
-        hexModel =
-            { border = "black"
-            , colour = const.hexColour
-            , size = const.hexSize
-            , value = fish
-            }
-    in
-        App.map HexagonMsg (hexagonFace pixelCoords hexModel)
+drawHexagon : HexModel -> Svg Msg
+drawHexagon tile =
+    App.map HexagonMsg (hexagonFace tile)
 
 
 
