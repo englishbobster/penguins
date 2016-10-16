@@ -1,27 +1,62 @@
-module Hexagon exposing (hexagonFace)
+module Hexagon
+    exposing
+        ( HexModel
+        , Msg(..)
+        , updateHex
+        , hexagonFace
+        )
 
 import String exposing (join)
 import Svg exposing (Svg, svg, text', text, polygon)
 import Svg.Attributes exposing (style, points, x, y, fontSize, dy)
+import Svg.Events exposing (onMouseOver)
 
 
 type alias Coord =
     ( Float, Float )
 
 
-hexagonFace : Coord -> Int -> String -> String -> Svg msg
-hexagonFace center size colour label =
+type alias HexModel =
+    { border : String
+    , center : Coord
+    , size : Int
+    , colour : String
+    , value : Int
+    }
+
+
+type Msg
+    = HighLight
+
+
+updateHex : Msg -> HexModel -> HexModel
+updateHex msg model =
+    case msg of
+        HighLight ->
+            { model | border = "white" }
+
+
+hexagonFace : HexModel -> Svg Msg
+hexagonFace model =
     svg []
-        [ polygon [ points (hexagonPoints center size), hexColour colour ] []
-        , hexagonLabel center label
+        [ polygon
+            [ points (hexagonPoints model.center model.size)
+            , hexColour model.colour model.border
+            , onMouseOver HighLight
+            ]
+            []
+        , hexagonValue model.center model.value
         ]
 
 
-hexagonLabel : Coord -> String -> Svg msg
-hexagonLabel center label =
+hexagonValue : Coord -> Int -> Svg msg
+hexagonValue center value =
     let
         ( xcenter, ycenter ) =
             center
+
+        label =
+            toString value
 
         attributeList =
             [ x (toString xcenter)
@@ -40,13 +75,14 @@ hexagonLabel center label =
         text' attributeList [ text label ]
 
 
-hexColour : String -> Svg.Attribute msg
-hexColour colour =
+hexColour : String -> String -> Svg.Attribute msg
+hexColour colour borderColour =
     style
         ("fill:"
             ++ colour
-            ++ ";stroke:black;"
-            ++ "stroke-width:6"
+            ++ ";stroke:"
+            ++ borderColour
+            ++ ";stroke-width:6"
         )
 
 

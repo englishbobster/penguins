@@ -1,7 +1,7 @@
 module Penguins exposing (..)
 
 import Dict exposing (Dict, empty, insert)
-import Hexagon exposing (hexagonFace)
+import Hexagon exposing (Msg(HighLight), hexagonFace)
 import Html exposing (Html, text, div)
 import Html.Attributes exposing (style)
 import Html.App as App
@@ -94,6 +94,7 @@ type Msg
     = NoOp
     | GenerateBoard Time
     | MousePos Position
+    | HexagonMsg Hexagon.Msg
 
 
 
@@ -115,6 +116,9 @@ update msg model =
               }
             , Cmd.none
             )
+
+        HexagonMsg hexmsg ->
+            ( model, Cmd.none )
 
 
 updatePlayer : Model -> Position -> PlayerState
@@ -301,7 +305,7 @@ roundAxialHex ( x, y ) =
 -- View
 
 
-view : Model -> Html msg
+view : Model -> Html Msg
 view model =
     let
         playerPosition =
@@ -356,24 +360,36 @@ placePlayer coords =
         [ xpos, ypos, height "50", width "50", xlinkHref "../graphics/batzmaru.svg" ]
 
 
-drawBoard : Board -> List (Svg msg)
+drawBoard : Board -> List (Svg Msg)
 drawBoard board =
     List.map (\key -> drawHexagon key (fishOnTile key board)) (Dict.keys board)
 
 
-fishOnTile : AxialCoords -> Board -> String
+fishOnTile : AxialCoords -> Board -> Int
 fishOnTile key board =
     let
         tile =
             Dict.get key board
                 |> Maybe.withDefault emptyTile
     in
-        toString tile.fish
+        tile.fish
 
 
-drawHexagon : AxialCoords -> String -> Svg msg
+drawHexagon : AxialCoords -> Int -> Svg Msg
 drawHexagon coord fish =
-    hexagonFace (axialCoordsToPixel const.hexSize coord) const.hexSize const.hexColour fish
+    let
+        pixelCoords =
+            axialCoordsToPixel const.hexSize coord
+
+        hexModel =
+            { border = "black"
+            , center = pixelCoords
+            , colour = const.hexColour
+            , size = const.hexSize
+            , value = fish
+            }
+    in
+        App.map HexagonMsg (hexagonFace hexModel)
 
 
 
