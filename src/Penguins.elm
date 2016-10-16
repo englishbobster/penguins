@@ -119,15 +119,7 @@ update msg model =
             )
 
         HexagonMsg hexmsg ->
-            let
-                listCenters =
-                    List.map
-                        (\tile ->
-                            pixelToAxialCoords const.hexSize tile.center
-                        )
-                        (Dict.values model.board)
-            in
-                ( model, Cmd.none )
+            ( model, Cmd.none )
 
 
 updatePlayer : Model -> Position -> PlayerState
