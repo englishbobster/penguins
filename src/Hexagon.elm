@@ -18,7 +18,6 @@ type alias Coord =
 
 type alias HexModel =
     { border : String
-    , center : Coord
     , size : Int
     , colour : String
     , value : Int
@@ -36,16 +35,16 @@ updateHex msg model =
             { model | border = "white" }
 
 
-hexagonFace : HexModel -> Svg Msg
-hexagonFace model =
+hexagonFace : Coord -> HexModel -> Svg Msg
+hexagonFace center model =
     svg []
         [ polygon
-            [ points (hexagonPoints model.center model.size)
+            [ points (hexagonPoints center model.size)
             , hexColour model.colour model.border
             , onMouseOver HighLight
             ]
             []
-        , hexagonValue model.center model.value
+        , hexagonValue center model.value
         ]
 
 

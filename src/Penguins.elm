@@ -1,7 +1,7 @@
 module Penguins exposing (..)
 
 import Dict exposing (Dict, empty, insert)
-import Hexagon exposing (Msg(HighLight), hexagonFace)
+import Hexagon exposing (Msg(HighLight), HexModel, hexagonFace)
 import Html exposing (Html, text, div)
 import Html.Attributes exposing (style)
 import Html.App as App
@@ -52,12 +52,8 @@ type alias Point =
     ( Float, Float )
 
 
-type alias HexTile =
-    { fish : Int }
-
-
 type alias Board =
-    Dict AxialCoords HexTile
+    Dict AxialCoords HexModel
 
 
 type PlayerState
@@ -72,9 +68,13 @@ type alias Player =
     }
 
 
-emptyTile : HexTile
+emptyTile : HexModel
 emptyTile =
-    { fish = 0 }
+    { value = 0
+    , border = "black"
+    , colour = "blue"
+    , size = const.hexSize
+    }
 
 
 type alias Model =
@@ -174,7 +174,7 @@ generateBoard timeAsSeed ( rows, columns ) =
         mapkeys =
             generateMapKeys rows columns
     in
-        List.map2 (\k v -> ( k, { emptyTile | fish = v } )) mapkeys fishList |> Dict.fromList
+        List.map2 (\k v -> ( k, { emptyTile | value = v } )) mapkeys fishList |> Dict.fromList
 
 
 timeInSeconds : Time -> Int
@@ -372,7 +372,7 @@ fishOnTile key board =
             Dict.get key board
                 |> Maybe.withDefault emptyTile
     in
-        tile.fish
+        tile.value
 
 
 drawHexagon : AxialCoords -> Int -> Svg Msg
@@ -383,13 +383,12 @@ drawHexagon coord fish =
 
         hexModel =
             { border = "black"
-            , center = pixelCoords
             , colour = const.hexColour
             , size = const.hexSize
             , value = fish
             }
     in
-        App.map HexagonMsg (hexagonFace hexModel)
+        App.map HexagonMsg (hexagonFace pixelCoords hexModel)
 
 
 
