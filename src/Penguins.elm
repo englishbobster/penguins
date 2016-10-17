@@ -2,19 +2,15 @@ module Penguins exposing (..)
 
 import Dict exposing (Dict, empty, insert)
 import Hexagon exposing (Msg(..), HexModel, hexagonFace, updateHex)
-import Html exposing (Html, text, div)
-import Html.Attributes exposing (style)
+import Html exposing (Html, div)
 import Html.App as App
-import Svg exposing (Svg, polygon, image)
+import Svg exposing (Svg, image)
 import Svg.Attributes
     exposing
-        ( points
-        , viewBox
-        , x
+        ( x
         , y
         , height
         , width
-        , preserveAspectRatio
         , xlinkHref
         )
 import String exposing (join)
@@ -153,19 +149,16 @@ updatePlayer model pos =
 
         Placed player ->
             let
-                ( oldx, oldy ) =
-                    player.currentPosition
-
-                newPos =
+                newPosition =
                     pixelToAxialCoords const.hexSize
                         ( toFloat pos.x
                         , toFloat pos.y
                         )
             in
-                if (isTile model.board newPos) then
+                if (isTile model.board newPosition) then
                     Placed
-                        { lastPosition = Just ( oldx, oldy )
-                        , currentPosition = newPos
+                        { lastPosition = Just player.currentPosition
+                        , currentPosition = newPosition
                         , score = 0
                         }
                 else
