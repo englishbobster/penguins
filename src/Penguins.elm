@@ -64,7 +64,7 @@ type PlayerState
 
 
 type alias Player =
-    { lastPosition : AxialCoords
+    { lastPosition : Maybe AxialCoords
     , currentPosition : AxialCoords
     , score : Int
     }
@@ -147,7 +147,7 @@ updatePlayer model pos =
                         ( toFloat pos.x
                         , toFloat pos.y
                         )
-                , lastPosition = ( -100, -100 )
+                , lastPosition = Nothing
                 , score = 0
                 }
 
@@ -164,7 +164,7 @@ updatePlayer model pos =
             in
                 if (isTile model.board newPos) then
                     Placed
-                        { lastPosition = ( oldx, oldy )
+                        { lastPosition = Just ( oldx, oldy )
                         , currentPosition = newPos
                         , score = 0
                         }
@@ -352,24 +352,23 @@ view model =
 
 onBoard : Model -> Player -> List (Svg msg)
 onBoard model player =
-    if (isTile model.board player.currentPosition) then
-        [ Svg.image
-            (placePlayer
-                ( (fst player.currentPosition)
-                , (snd player.currentPosition)
-                )
-            )
-            []
-        ]
-    else
-        [ Svg.image
-            (placePlayer
-                ( (fst player.lastPosition)
-                , (snd player.lastPosition)
-                )
-            )
-            []
-        ]
+    let
+        lastKnownPos =
+            Maybe.withDefault ( 0, 0 ) player.lastPosition
+
+        newPos =
+            player.currentPosition
+    in
+        if (isTile model.board newPos) then
+            [ Svg.image
+                (placePlayer newPos)
+                []
+            ]
+        else
+            [ Svg.image
+                (placePlayer lastKnownPos)
+                []
+            ]
 
 
 placePlayer : AxialCoords -> List (Svg.Attribute msg)
