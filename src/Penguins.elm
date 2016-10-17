@@ -1,7 +1,7 @@
 module Penguins exposing (..)
 
 import Dict exposing (Dict, empty, insert)
-import Hexagon exposing (Msg(HighLight), HexModel, hexagonFace, updateHex)
+import Hexagon exposing (Msg(..), HexModel, hexagonFace, updateHex)
 import Html exposing (Html, text, div)
 import Html.Attributes exposing (style)
 import Html.App as App
@@ -123,7 +123,7 @@ update msg model =
 
         HexagonMsg hexmsg ->
             case hexmsg of
-                HighLight center ->
+                Something center ->
                     let
                         axcoord =
                             pixelToAxialCoords const.hexSize center

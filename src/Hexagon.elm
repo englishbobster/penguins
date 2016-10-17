@@ -27,14 +27,14 @@ type alias HexModel =
 
 
 type Msg
-    = HighLight Coord
+    = Something Coord
 
 
 updateHex : Msg -> HexModel -> HexModel
 updateHex msg model =
     case msg of
-        HighLight pos ->
-            { model | border = "white" }
+        Something pos ->
+            model
 
 
 hexagonFace : HexModel -> Svg Msg
@@ -43,7 +43,7 @@ hexagonFace model =
         [ polygon
             [ points (hexagonPoints model.center (model.size - model.shrinkFactor))
             , hexColour model.colour model.border
-            , onMouseOver (HighLight model.center)
+            , onMouseOver (Something model.center)
             ]
             []
         , hexagonValue model.center model.value
