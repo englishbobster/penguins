@@ -155,7 +155,7 @@ updatePlayer model pos =
                         , toFloat pos.y
                         )
             in
-                if (isTile model.board newPosition) then
+                if (isAllowedMove model.board player newPosition) then
                     Placed
                         { lastPosition = Just player.currentPosition
                         , currentPosition = newPosition
@@ -163,6 +163,24 @@ updatePlayer model pos =
                         }
                 else
                     Placed player
+
+
+isAllowedMove : Board -> Player -> AxialCoords -> Bool
+isAllowedMove board player newPos =
+    let
+        ( oldx, oldy ) =
+            player.currentPosition
+
+        ( newx, newy ) =
+            newPos
+
+        oldz =
+            0 - oldx - oldy
+
+        newz =
+            0 - newx - newy
+    in
+        True == isTile board newPos && (oldx == newx || oldy == newy || oldz == newz)
 
 
 isTile : Board -> AxialCoords -> Bool
