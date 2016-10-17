@@ -119,7 +119,19 @@ update msg model =
             )
 
         HexagonMsg hexmsg ->
-            ( model, Cmd.none )
+            case hexmsg of
+                HighLight center ->
+                    let
+                        axcoord =
+                            pixelToAxialCoords const.hexSize center
+
+                        tileModel =
+                            Dict.get axcoord model.board |> Maybe.withDefault emptyTile
+
+                        modifiedBoard =
+                            Dict.insert axcoord (updateHex hexmsg tileModel) model.board
+                    in
+                        ( { model | board = modifiedBoard }, Cmd.none )
 
 
 updatePlayer : Model -> Position -> PlayerState
