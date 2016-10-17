@@ -22,6 +22,7 @@ type alias HexModel =
     , colour : String
     , value : Int
     , center : Coord
+    , shrinkFactor : Int
     }
 
 
@@ -40,7 +41,7 @@ hexagonFace : HexModel -> Svg Msg
 hexagonFace model =
     svg []
         [ polygon
-            [ points (hexagonPoints model.center model.size)
+            [ points (hexagonPoints model.center (model.size - model.shrinkFactor))
             , hexColour model.colour model.border
             , onMouseOver (HighLight model.center)
             ]

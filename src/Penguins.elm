@@ -32,6 +32,7 @@ type alias Constants =
     , playerSvgOffset : Float
     , hexSize : Int
     , hexColour : String
+    , hexShrinkFactor : Int
     }
 
 
@@ -39,8 +40,9 @@ const : Constants
 const =
     { boardSize = ( 10, 10 )
     , playerSvgOffset = 25
-    , hexSize = 50
+    , hexSize = 55
     , hexColour = "blue"
+    , hexShrinkFactor = 5
     }
 
 
@@ -75,6 +77,7 @@ emptyTile =
     , colour = const.hexColour
     , size = const.hexSize
     , center = ( 0, 0 )
+    , shrinkFactor = const.hexShrinkFactor
     }
 
 
@@ -342,7 +345,7 @@ view model =
     in
         div []
             [ Svg.svg
-                [ height "1000", width "100%" ]
+                [ height "1100", width "100%" ]
                 ((drawBoard model.board) ++ playerPosition)
             ]
 
@@ -387,6 +390,7 @@ placePlayer coords =
 drawBoard : Board -> List (Svg Msg)
 drawBoard board =
     let
+        getTile : AxialCoords -> HexModel
         getTile tileCoord =
             Dict.get tileCoord board
                 |> Maybe.withDefault emptyTile
