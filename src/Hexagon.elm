@@ -1,6 +1,7 @@
 module Hexagon
     exposing
         ( HexModel
+        , Coord
         , Msg(..)
         , updateHex
         , hexagonFace

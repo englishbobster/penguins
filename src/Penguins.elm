@@ -1,7 +1,7 @@
 module Penguins exposing (..)
 
 import Dict exposing (Dict, empty, insert)
-import Hexagon exposing (Msg(..), HexModel, hexagonFace, updateHex)
+import Hexagon exposing (Msg(..), HexModel, Coord, hexagonFace, updateHex)
 import Html exposing (Html, div)
 import Html.App as App
 import Svg exposing (Svg, image)
@@ -44,10 +44,6 @@ const =
 
 type alias AxialCoords =
     ( Int, Int )
-
-
-type alias Point =
-    ( Float, Float )
 
 
 type alias Board =
@@ -271,7 +267,7 @@ convertFromEvenQToAxial ( col, row ) =
         ( x, z )
 
 
-axialCoordsToPixel : Int -> AxialCoords -> Point
+axialCoordsToPixel : Int -> AxialCoords -> Coord
 axialCoordsToPixel size ( q, r ) =
     let
         offset =
@@ -286,7 +282,7 @@ axialCoordsToPixel size ( q, r ) =
         ( offset + x, offset + y )
 
 
-pixelToAxialCoords : Int -> Point -> AxialCoords
+pixelToAxialCoords : Int -> Coord -> AxialCoords
 pixelToAxialCoords size ( x, y ) =
     let
         offset =
