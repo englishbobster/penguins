@@ -1,7 +1,24 @@
 module Penguins exposing (..)
 
-import Dict exposing (Dict, empty, insert)
 import Hexagon exposing (Msg(..), HexModel, Coord, hexagonFace, updateHex)
+import Model
+    exposing
+        ( Model
+        , AxialCoord
+        , Board
+        , Player
+        , PlayerState(..)
+        , initialModel
+        , emptyTile
+        , const
+        )
+import Helpers
+    exposing
+        ( convertFromEvenQToAxial
+        , axialCoordsToPixel
+        , pixelToAxialCoords
+        )
+import Dict exposing (Dict, empty, insert)
 import Html exposing (Html, div)
 import Html.App as App
 import Svg exposing (Svg, image)
@@ -20,70 +37,7 @@ import Random exposing (int, step, initialSeed)
 import Mouse exposing (Position, clicks)
 
 
---Model
-
-
-type alias Constants =
-    { boardSize : ( Int, Int )
-    , playerSvgOffset : Float
-    , hexSize : Int
-    , hexColour : String
-    , hexShrinkFactor : Int
-    }
-
-
-const : Constants
-const =
-    { boardSize = ( 10, 10 )
-    , playerSvgOffset = 25
-    , hexSize = 55
-    , hexColour = "blue"
-    , hexShrinkFactor = 5
-    }
-
-
-type alias AxialCoords =
-    ( Int, Int )
-
-
-type alias Board =
-    Dict AxialCoords HexModel
-
-
-type PlayerState
-    = NotOnBoard
-    | Placed Player
-
-
-type alias Player =
-    { lastPosition : Maybe AxialCoords
-    , currentPosition : AxialCoords
-    , score : Int
-    }
-
-
-emptyTile : HexModel
-emptyTile =
-    { value = 0
-    , border = "black"
-    , colour = const.hexColour
-    , size = const.hexSize
-    , center = ( 0, 0 )
-    , shrinkFactor = const.hexShrinkFactor
-    }
-
-
-type alias Model =
-    { board : Board
-    , playerState : PlayerState
-    }
-
-
-initialModel : Model
-initialModel =
-    { board = Dict.empty
-    , playerState = NotOnBoard
-    }
+--update
 
 
 type Msg
@@ -91,10 +45,6 @@ type Msg
     | GenerateBoard Time
     | MousePos Position
     | HexagonMsg Hexagon.Msg
-
-
-
--- Update
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -161,7 +111,7 @@ updatePlayer model pos =
                     Placed player
 
 
-isAllowedMove : Board -> Player -> AxialCoords -> Bool
+isAllowedMove : Board -> Player -> AxialCoord -> Bool
 isAllowedMove board player newPos =
     let
         ( oldx, oldy ) =
@@ -179,7 +129,7 @@ isAllowedMove board player newPos =
         True == isTile board newPos && (oldx == newx || oldy == newy || oldz == newz)
 
 
-isTile : Board -> AxialCoords -> Bool
+isTile : Board -> AxialCoord -> Bool
 isTile board coord =
     let
         coordList =
@@ -230,12 +180,12 @@ randomizeFish seed listSize =
         nrFish
 
 
-generateMapKeys : Int -> Int -> List AxialCoords
+generateMapKeys : Int -> Int -> List AxialCoord
 generateMapKeys maxColumns maxRows =
     List.map convertFromEvenQToAxial (generateAllMapKeys maxColumns 0 maxRows [])
 
 
-generateAllMapKeys : Int -> Int -> Int -> List AxialCoords -> List AxialCoords
+generateAllMapKeys : Int -> Int -> Int -> List AxialCoord -> List AxialCoord
 generateAllMapKeys maxColumns currentColumn maxRows list =
     if currentColumn == maxColumns then
         list
@@ -247,92 +197,9 @@ generateAllMapKeys maxColumns currentColumn maxRows list =
             generateAllMapKeys maxColumns (currentColumn + 1) maxRows newList
 
 
-generateMapKeyListForRow : Int -> Int -> List AxialCoords
+generateMapKeyListForRow : Int -> Int -> List AxialCoord
 generateMapKeyListForRow colNr maxRows =
     List.map (\n -> ( colNr, n )) [0..(maxRows - 1)]
-
-
-convertFromEvenQToAxial : ( Int, Int ) -> AxialCoords
-convertFromEvenQToAxial ( col, row ) =
-    let
-        x =
-            col
-
-        z =
-            row - (col - (col % 2)) // 2
-
-        y =
-            0 - x - z
-    in
-        ( x, z )
-
-
-axialCoordsToPixel : Int -> AxialCoords -> Coord
-axialCoordsToPixel size ( q, r ) =
-    let
-        offset =
-            (toFloat (size * 2))
-
-        x =
-            (toFloat size) * (3 / 2) * (toFloat q)
-
-        y =
-            (toFloat size) * (sqrt 3) * ((toFloat r) + ((toFloat q) / 2))
-    in
-        ( offset + x, offset + y )
-
-
-pixelToAxialCoords : Int -> Coord -> AxialCoords
-pixelToAxialCoords size ( x, y ) =
-    let
-        offset =
-            (toFloat (size * 2))
-
-        ox =
-            x - offset
-
-        oy =
-            y - offset
-
-        q =
-            (ox * 2 / 3) / (toFloat size)
-
-        r =
-            ((-ox / 3) + (((sqrt 3) / 3) * oy)) / (toFloat size)
-    in
-        ( q, r ) |> roundAxialHex
-
-
-roundAxialHex : ( Float, Float ) -> AxialCoords
-roundAxialHex ( x, y ) =
-    let
-        z =
-            0 - x - y
-
-        rx =
-            round x
-
-        ry =
-            round y
-
-        rz =
-            round (0 - x - y)
-
-        xdiff =
-            abs ((toFloat rx) - x)
-
-        ydiff =
-            abs ((toFloat ry) - y)
-
-        zdiff =
-            abs ((toFloat rz) - z)
-    in
-        if xdiff > ydiff && xdiff > zdiff then
-            ( (0 - ry - rz), ry )
-        else if ydiff > zdiff then
-            ( rx, (0 - rx - rz) )
-        else
-            ( rx, ry )
 
 
 
@@ -378,7 +245,7 @@ onBoard model player =
             ]
 
 
-placePlayer : AxialCoords -> List (Svg.Attribute msg)
+placePlayer : AxialCoord -> List (Svg.Attribute msg)
 placePlayer coords =
     let
         ( px, py ) =
@@ -396,7 +263,7 @@ placePlayer coords =
 drawBoard : Board -> List (Svg Msg)
 drawBoard board =
     let
-        getTile : AxialCoords -> HexModel
+        getTile : AxialCoord -> HexModel
         getTile tileCoord =
             Dict.get tileCoord board
                 |> Maybe.withDefault emptyTile
