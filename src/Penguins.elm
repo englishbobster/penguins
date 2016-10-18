@@ -1,12 +1,11 @@
 module Penguins exposing (..)
 
 import Hexagon exposing (Msg(..), HexModel, Coord, hexagonFace, updateHex)
+import Player exposing (PlayerModel)
 import Model
     exposing
         ( Model
-        , AxialCoord
         , Board
-        , Player
         , PlayerState(..)
         , initialModel
         , emptyTile
@@ -14,7 +13,8 @@ import Model
         )
 import Helpers
     exposing
-        ( convertFromEvenQToAxial
+        ( AxialCoord
+        , convertFromEvenQToAxial
         , axialCoordsToPixel
         , pixelToAxialCoords
         )
@@ -111,7 +111,7 @@ updatePlayer model pos =
                     Placed player
 
 
-isAllowedMove : Board -> Player -> AxialCoord -> Bool
+isAllowedMove : Board -> PlayerModel -> AxialCoord -> Bool
 isAllowedMove board player newPos =
     let
         ( oldx, oldy ) =
@@ -224,7 +224,7 @@ view model =
             ]
 
 
-onBoard : Model -> Player -> List (Svg msg)
+onBoard : Model -> PlayerModel -> List (Svg msg)
 onBoard model player =
     let
         lastKnownPos =

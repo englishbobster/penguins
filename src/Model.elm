@@ -1,9 +1,7 @@
 module Model
     exposing
         ( Model
-        , AxialCoord
         , Board
-        , Player
         , PlayerState(..)
         , initialModel
         , emptyTile
@@ -12,6 +10,8 @@ module Model
 
 import Dict exposing (Dict)
 import Hexagon exposing (HexModel)
+import Player exposing (PlayerModel)
+import Helpers exposing (AxialCoord)
 
 
 --Model
@@ -36,35 +36,13 @@ const =
     }
 
 
-type alias AxialCoord =
-    ( Int, Int )
-
-
 type alias Board =
     Dict AxialCoord HexModel
 
 
 type PlayerState
     = NotOnBoard
-    | Placed Player
-
-
-type alias Player =
-    { lastPosition : Maybe AxialCoord
-    , currentPosition : AxialCoord
-    , score : Int
-    }
-
-
-emptyTile : HexModel
-emptyTile =
-    { value = 0
-    , border = "black"
-    , colour = const.hexColour
-    , size = const.hexSize
-    , center = ( 0, 0 )
-    , shrinkFactor = const.hexShrinkFactor
-    }
+    | Placed PlayerModel
 
 
 type alias Model =
@@ -77,4 +55,15 @@ initialModel : Model
 initialModel =
     { board = Dict.empty
     , playerState = NotOnBoard
+    }
+
+
+emptyTile : HexModel
+emptyTile =
+    { value = 0
+    , border = "black"
+    , colour = const.hexColour
+    , size = const.hexSize
+    , center = ( 0, 0 )
+    , shrinkFactor = const.hexShrinkFactor
     }

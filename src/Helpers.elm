@@ -1,12 +1,16 @@
 module Helpers
     exposing
-        ( convertFromEvenQToAxial
+        ( AxialCoord
+        , convertFromEvenQToAxial
         , axialCoordsToPixel
         , pixelToAxialCoords
         )
 
-import Model exposing (AxialCoord)
 import Hexagon exposing (Coord)
+
+
+type alias AxialCoord =
+    ( Int, Int )
 
 
 convertFromEvenQToAxial : ( Int, Int ) -> AxialCoord
