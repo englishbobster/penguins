@@ -296,16 +296,3 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
-
-
-
---test code start
-
-
-modelAsText : Model -> String
-modelAsText model =
-    List.map2 (\k v -> ( k, v )) (Dict.keys model.board) (Dict.values model.board) |> toString
-
-
-
---test code end
