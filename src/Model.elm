@@ -5,56 +5,46 @@ module Model
         , PlayerState(..)
         , initialModel
         , emptyTile
-        , const
         )
 
 import Dict exposing (Dict)
 import Hexagon exposing (HexModel)
 import Player exposing (PlayerModel)
 import Helpers exposing (AxialCoord)
+import Constants exposing (const)
 
 
 --Model
-
-
-type alias Constants =
-    { boardSize : ( Int, Int )
-    , playerSvgOffset : Float
-    , hexSize : Int
-    , hexColour : String
-    , hexShrinkFactor : Int
-    }
-
-
-const : Constants
-const =
-    { boardSize = ( 10, 10 )
-    , playerSvgOffset = 25
-    , hexSize = 55
-    , hexColour = "blue"
-    , hexShrinkFactor = 5
-    }
 
 
 type alias Board =
     Dict AxialCoord HexModel
 
 
+type GameState
+    = SetUp
+    | InPlay
+
+
 type PlayerState
-    = NotOnBoard
+    = NoPiecesPlaced
     | Placed PlayerModel
 
 
 type alias Model =
     { board : Board
-    , playerState : PlayerState
+    , playerOneState : PlayerState
+    , playerTwoState : PlayerState
+    , gameState : GameState
     }
 
 
 initialModel : Model
 initialModel =
     { board = Dict.empty
-    , playerState = NotOnBoard
+    , playerOneState = NoPiecesPlaced
+    , playerTwoState = NoPiecesPlaced
+    , gameState = InPlay
     }
 
 

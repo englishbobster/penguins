@@ -1,7 +1,7 @@
 module Penguins exposing (..)
 
 import Hexagon exposing (Msg(..), HexModel, Coord, hexagonFace, updateHex)
-import Player exposing (PlayerModel)
+import Player exposing (PlayerModel, placePlayer)
 import Model
     exposing
         ( Model
@@ -9,7 +9,6 @@ import Model
         , PlayerState(..)
         , initialModel
         , emptyTile
-        , const
         )
 import Helpers
     exposing
@@ -18,18 +17,12 @@ import Helpers
         , axialCoordsToPixel
         , pixelToAxialCoords
         )
+import Constants exposing (const)
 import Dict exposing (Dict, empty, insert)
 import Html exposing (Html, div)
 import Html.App as App
-import Svg exposing (Svg, image)
-import Svg.Attributes
-    exposing
-        ( x
-        , y
-        , height
-        , width
-        , xlinkHref
-        )
+import Svg exposing (Svg)
+import Svg.Attributes exposing (height, width)
 import String exposing (join)
 import Time exposing (Time, inSeconds, now)
 import Task exposing (perform)
@@ -58,7 +51,7 @@ update msg model =
 
         MousePos pos ->
             ( { model
-                | playerState = updatePlayer model pos
+                | playerOneState = updatePlayer model pos
               }
             , Cmd.none
             )
@@ -81,8 +74,8 @@ update msg model =
 
 updatePlayer : Model -> Position -> PlayerState
 updatePlayer model pos =
-    case model.playerState of
-        NotOnBoard ->
+    case model.playerOneState of
+        NoPiecesPlaced ->
             Placed
                 { currentPosition =
                     pixelToAxialCoords const.hexSize
@@ -91,6 +84,7 @@ updatePlayer model pos =
                         )
                 , lastPosition = Nothing
                 , score = 0
+                , image = const.playerOneImage
                 }
 
         Placed player ->
@@ -106,6 +100,7 @@ updatePlayer model pos =
                         { lastPosition = Just player.currentPosition
                         , currentPosition = newPosition
                         , score = 0
+                        , image = player.image
                         }
                 else
                     Placed player
@@ -210,8 +205,8 @@ view : Model -> Html Msg
 view model =
     let
         playerPosition =
-            case model.playerState of
-                NotOnBoard ->
+            case model.playerOneState of
+                NoPiecesPlaced ->
                     []
 
                 Placed player ->
@@ -235,29 +230,14 @@ onBoard model player =
     in
         if (isTile model.board newPos) then
             [ Svg.image
-                (placePlayer newPos)
+                (placePlayer newPos player.image)
                 []
             ]
         else
             [ Svg.image
-                (placePlayer lastKnownPos)
+                (placePlayer lastKnownPos player.image)
                 []
             ]
-
-
-placePlayer : AxialCoord -> List (Svg.Attribute msg)
-placePlayer coords =
-    let
-        ( px, py ) =
-            axialCoordsToPixel const.hexSize coords
-
-        xpos =
-            x (toString (px - const.playerSvgOffset))
-
-        ypos =
-            y (toString (py - const.playerSvgOffset))
-    in
-        [ xpos, ypos, height "50", width "50", xlinkHref "../graphics/batzmaru.svg" ]
 
 
 drawBoard : Board -> List (Svg Msg)

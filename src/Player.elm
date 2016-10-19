@@ -1,10 +1,29 @@
-module Player exposing (PlayerModel)
+module Player exposing (PlayerModel, placePlayer)
 
-import Helpers exposing (AxialCoord)
+import Helpers exposing (AxialCoord, axialCoordsToPixel)
+import Constants exposing (const)
+import Svg
+import Svg.Attributes exposing (x, y, height, width, xlinkHref)
 
 
 type alias PlayerModel =
     { lastPosition : Maybe AxialCoord
     , currentPosition : AxialCoord
     , score : Int
+    , image : String
     }
+
+
+placePlayer : AxialCoord -> String -> List (Svg.Attribute msg)
+placePlayer coords image =
+    let
+        ( px, py ) =
+            axialCoordsToPixel const.hexSize coords
+
+        xpos =
+            x (toString (px - const.playerSvgOffset))
+
+        ypos =
+            y (toString (py - const.playerSvgOffset))
+    in
+        [ xpos, ypos, height "50", width "50", xlinkHref image ]
