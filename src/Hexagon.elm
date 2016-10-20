@@ -2,8 +2,6 @@ module Hexagon
     exposing
         ( HexModel
         , Coord
-        , Msg(..)
-        , updateHex
         , hexagonFace
         )
 
@@ -27,24 +25,12 @@ type alias HexModel =
     }
 
 
-type Msg
-    = Something Coord
-
-
-updateHex : Msg -> HexModel -> HexModel
-updateHex msg model =
-    case msg of
-        Something pos ->
-            model
-
-
-hexagonFace : HexModel -> Svg Msg
+hexagonFace : HexModel -> Svg msg
 hexagonFace model =
     svg []
         [ polygon
             [ points (hexagonPoints model.center (model.size - model.shrinkFactor))
             , hexColour model.colour model.border
-            , onMouseOver (Something model.center)
             ]
             []
         , hexagonValue model.center model.value

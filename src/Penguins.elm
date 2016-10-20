@@ -1,6 +1,6 @@
 module Penguins exposing (..)
 
-import Hexagon exposing (Msg(..), HexModel, Coord, hexagonFace, updateHex)
+import Hexagon exposing (HexModel, Coord, hexagonFace)
 import Player exposing (PlayerModel, PlayerState(..), placePlayer)
 import Model
     exposing
@@ -36,7 +36,6 @@ type Msg
     = NoOp
     | GenerateBoard Time
     | MousePos Position
-    | HexagonMsg Hexagon.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -54,21 +53,6 @@ update msg model =
               }
             , Cmd.none
             )
-
-        HexagonMsg hexmsg ->
-            case hexmsg of
-                Something center ->
-                    let
-                        axcoord =
-                            pixelToAxialCoords const.hexSize center
-
-                        tileModel =
-                            Dict.get axcoord model.board |> Maybe.withDefault emptyTile
-
-                        modifiedBoard =
-                            Dict.insert axcoord (updateHex hexmsg tileModel) model.board
-                    in
-                        ( { model | board = modifiedBoard }, Cmd.none )
 
 
 updatePlayer : PlayerState -> Board -> Position -> PlayerState
@@ -252,7 +236,7 @@ drawBoard board =
 
 drawHexagon : HexModel -> Svg Msg
 drawHexagon tile =
-    App.map HexagonMsg (hexagonFace tile)
+    hexagonFace tile
 
 
 
