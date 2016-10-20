@@ -2,14 +2,13 @@ module Model
     exposing
         ( Model
         , Board
-        , PlayerState(..)
         , initialModel
         , emptyTile
         )
 
 import Dict exposing (Dict)
 import Hexagon exposing (HexModel)
-import Player exposing (PlayerModel)
+import Player exposing (PlayerModel, PlayerState(..))
 import Helpers exposing (AxialCoord)
 import Constants exposing (const)
 
@@ -24,11 +23,6 @@ type alias Board =
 type GameState
     = SetUp
     | InPlay
-
-
-type PlayerState
-    = NoPiecesPlaced
-    | Placed PlayerModel
 
 
 type alias Model =

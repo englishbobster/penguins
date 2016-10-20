@@ -1,12 +1,11 @@
 module Penguins exposing (..)
 
 import Hexagon exposing (Msg(..), HexModel, Coord, hexagonFace, updateHex)
-import Player exposing (PlayerModel, placePlayer)
+import Player exposing (PlayerModel, PlayerState(..), placePlayer)
 import Model
     exposing
         ( Model
         , Board
-        , PlayerState(..)
         , initialModel
         , emptyTile
         )

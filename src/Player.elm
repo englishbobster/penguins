@@ -1,9 +1,14 @@
-module Player exposing (PlayerModel, placePlayer)
+module Player exposing (PlayerModel, PlayerState(..), placePlayer)
 
 import Helpers exposing (AxialCoord, axialCoordsToPixel)
 import Constants exposing (const)
 import Svg
 import Svg.Attributes exposing (x, y, height, width, xlinkHref)
+
+
+type PlayerState
+    = NoPiecesPlaced
+    | Placed PlayerModel
 
 
 type alias PlayerModel =
