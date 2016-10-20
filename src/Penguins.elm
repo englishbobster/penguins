@@ -50,7 +50,7 @@ update msg model =
 
         MousePos pos ->
             ( { model
-                | playerOneState = updatePlayer model pos
+                | playerOneState = updatePlayer model.playerOneState model pos
               }
             , Cmd.none
             )
@@ -71,9 +71,9 @@ update msg model =
                         ( { model | board = modifiedBoard }, Cmd.none )
 
 
-updatePlayer : Model -> Position -> PlayerState
-updatePlayer model pos =
-    case model.playerOneState of
+updatePlayer : PlayerState -> Model -> Position -> PlayerState
+updatePlayer playerState model pos =
+    case playerState of
         NoPiecesPlaced ->
             Placed
                 { currentPosition =
