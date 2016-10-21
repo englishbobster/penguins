@@ -209,15 +209,9 @@ onBoard model player =
             player.currentPosition
     in
         if (isTile model.board newPos) then
-            [ Svg.image
-                (placePlayer newPos player.image)
-                []
-            ]
+            placePlayer newPos player.image
         else
-            [ Svg.image
-                (placePlayer lastKnownPos player.image)
-                []
-            ]
+            placePlayer lastKnownPos player.image
 
 
 drawBoard : Board -> List (Svg Msg)
