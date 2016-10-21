@@ -48,45 +48,42 @@ update msg model =
             ( { model | board = (generateBoard now const.boardSize) }, Cmd.none )
 
         MousePos pos ->
-            ( { model
-                | playerOneState = updatePlayer model.playerOneState model.board pos
-              }
-            , Cmd.none
-            )
-
-
-updatePlayer : PlayerState -> Board -> Position -> PlayerState
-updatePlayer playerState board pos =
-    case playerState of
-        NoPiecesPlaced ->
-            Placed
-                { currentPosition =
+            let
+                posAsAxial =
                     pixelToAxialCoords const.hexSize
                         ( toFloat pos.x
                         , toFloat pos.y
                         )
+            in
+                ( { model
+                    | playerOneState =
+                        updatePlayer model.playerOneState model.board posAsAxial
+                  }
+                , Cmd.none
+                )
+
+
+updatePlayer : PlayerState -> Board -> AxialCoord -> PlayerState
+updatePlayer playerState board pos =
+    case playerState of
+        NoPiecesPlaced ->
+            Placed
+                { currentPosition = pos
                 , lastPosition = Nothing
                 , score = 0
                 , image = const.playerOneImage
                 }
 
         Placed player ->
-            let
-                newPosition =
-                    pixelToAxialCoords const.hexSize
-                        ( toFloat pos.x
-                        , toFloat pos.y
-                        )
-            in
-                if (isAllowedMove board player newPosition) then
-                    Placed
-                        { lastPosition = Just player.currentPosition
-                        , currentPosition = newPosition
-                        , score = 0
-                        , image = player.image
-                        }
-                else
-                    Placed player
+            if (isAllowedMove board player pos) then
+                Placed
+                    { lastPosition = Just player.currentPosition
+                    , currentPosition = pos
+                    , score = 0
+                    , image = player.image
+                    }
+            else
+                Placed player
 
 
 isAllowedMove : Board -> PlayerModel -> AxialCoord -> Bool
