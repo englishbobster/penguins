@@ -1,7 +1,7 @@
 module Penguins exposing (..)
 
 import Hexagon exposing (HexModel, Coord, hexagonFace)
-import Player exposing (PlayerModel, updatePlayer)
+import Player exposing (PlayerModel, placePlayer, drawPlayerPieces)
 import Model
     exposing
         ( Model
@@ -55,7 +55,7 @@ update msg model =
                         , toFloat pos.y
                         )
             in
-                ( model, Cmd.none )
+                ( { model | playerOne = placePlayer posAsAxial model.playerOne }, Cmd.none )
 
 
 isAllowedMove : Board -> PlayerModel -> AxialCoord -> Bool
@@ -158,7 +158,11 @@ view model =
     div []
         [ Svg.svg
             [ height "1100", width "100%" ]
-            ((drawBoard model.board))
+            (List.append
+                (drawBoard model.board)
+                (drawPlayerPieces model.playerOne)
+            )
+        , Html.text (toString model.playerOne)
         ]
 
 
@@ -170,12 +174,7 @@ drawBoard board =
             Dict.get tileCoord board
                 |> Maybe.withDefault emptyTile
     in
-        List.map (\key -> drawHexagon (getTile key)) (Dict.keys board)
-
-
-drawHexagon : HexModel -> Svg Msg
-drawHexagon tile =
-    hexagonFace tile
+        List.map (\key -> hexagonFace (getTile key)) (Dict.keys board)
 
 
 

@@ -24,6 +24,10 @@ type alias Model =
     { board : Board
     , playerOne : PlayerModel
     , playerTwo : PlayerModel
+    , position :
+        { x : Int
+        , y : Int
+        }
     }
 
 
@@ -40,6 +44,7 @@ initialModel =
         , score = 0
         , image = const.playerTwoImage
         }
+    , position = { x = 0, y = 0 }
     }
 
 
