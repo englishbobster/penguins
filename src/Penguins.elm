@@ -1,7 +1,7 @@
 module Penguins exposing (..)
 
 import Hexagon exposing (HexModel, Coord, hexagonFace)
-import Player exposing (PlayerModel, PlayerState(..), placePlayer)
+import Player exposing (PlayerModel, updatePlayer)
 import Model
     exposing
         ( Model
@@ -55,42 +55,14 @@ update msg model =
                         , toFloat pos.y
                         )
             in
-                ( { model
-                    | playerOneState =
-                        updatePlayer model.playerOneState model.board posAsAxial
-                  }
-                , Cmd.none
-                )
-
-
-updatePlayer : PlayerState -> Board -> AxialCoord -> PlayerState
-updatePlayer playerState board pos =
-    case playerState of
-        NoPiecesPlaced ->
-            Placed
-                { currentPosition = pos
-                , lastPosition = Nothing
-                , score = 0
-                , image = const.playerOneImage
-                }
-
-        Placed player ->
-            if (isAllowedMove board player pos) then
-                Placed
-                    { lastPosition = Just player.currentPosition
-                    , currentPosition = pos
-                    , score = 0
-                    , image = player.image
-                    }
-            else
-                Placed player
+                ( model, Cmd.none )
 
 
 isAllowedMove : Board -> PlayerModel -> AxialCoord -> Bool
-isAllowedMove board player newPos =
+isAllowedMove board playermodel newPos =
     let
         ( oldx, oldy ) =
-            player.currentPosition
+            ( 0, 0 )
 
         ( newx, newy ) =
             newPos
@@ -183,35 +155,11 @@ generateMapKeyListForRow colNr maxRows =
 
 view : Model -> Html Msg
 view model =
-    let
-        playerPosition =
-            case model.playerOneState of
-                NoPiecesPlaced ->
-                    []
-
-                Placed player ->
-                    onBoard model player
-    in
-        div []
-            [ Svg.svg
-                [ height "1100", width "100%" ]
-                ((drawBoard model.board) ++ playerPosition)
-            ]
-
-
-onBoard : Model -> PlayerModel -> List (Svg msg)
-onBoard model player =
-    let
-        lastKnownPos =
-            Maybe.withDefault ( 0, 0 ) player.lastPosition
-
-        newPos =
-            player.currentPosition
-    in
-        if (isTile model.board newPos) then
-            placePlayer newPos player.image
-        else
-            placePlayer lastKnownPos player.image
+    div []
+        [ Svg.svg
+            [ height "1100", width "100%" ]
+            ((drawBoard model.board))
+        ]
 
 
 drawBoard : Board -> List (Svg Msg)

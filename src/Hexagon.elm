@@ -21,6 +21,7 @@ type alias HexModel =
     , colour : String
     , value : Int
     , center : Coord
+    , occupied : Bool
     , shrinkFactor : Int
     }
 

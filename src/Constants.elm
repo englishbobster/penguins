@@ -9,6 +9,7 @@ type alias Constants =
     , hexShrinkFactor : Int
     , playerOneImage : String
     , playerTwoImage : String
+    , piecesPerPlayer : Int
     }
 
 
@@ -21,4 +22,5 @@ const =
     , hexShrinkFactor = 5
     , playerOneImage = "../graphics/batzmaru.svg"
     , playerTwoImage = "../graphics/pengmaru.svg"
+    , piecesPerPlayer = 3
     }

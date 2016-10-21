@@ -8,7 +8,7 @@ module Model
 
 import Dict exposing (Dict)
 import Hexagon exposing (HexModel)
-import Player exposing (PlayerModel, PlayerState(..))
+import Player exposing (PlayerModel)
 import Helpers exposing (AxialCoord)
 import Constants exposing (const)
 
@@ -20,25 +20,26 @@ type alias Board =
     Dict AxialCoord HexModel
 
 
-type GameState
-    = SetUp
-    | InPlay
-
-
 type alias Model =
     { board : Board
-    , playerOneState : PlayerState
-    , playerTwoState : PlayerState
-    , gameState : GameState
+    , playerOne : PlayerModel
+    , playerTwo : PlayerModel
     }
 
 
 initialModel : Model
 initialModel =
     { board = Dict.empty
-    , playerOneState = NoPiecesPlaced
-    , playerTwoState = NoPiecesPlaced
-    , gameState = InPlay
+    , playerOne =
+        { placedPieces = []
+        , score = 0
+        , image = const.playerOneImage
+        }
+    , playerTwo =
+        { placedPieces = []
+        , score = 0
+        , image = const.playerTwoImage
+        }
     }
 
 
@@ -50,4 +51,5 @@ emptyTile =
     , size = const.hexSize
     , center = ( 0, 0 )
     , shrinkFactor = const.hexShrinkFactor
+    , occupied = False
     }

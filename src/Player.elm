@@ -1,4 +1,4 @@
-module Player exposing (PlayerModel, PlayerState(..), placePlayer)
+module Player exposing (PlayerModel, updatePlayer)
 
 import Helpers exposing (AxialCoord, axialCoordsToPixel)
 import Constants exposing (const)
@@ -6,17 +6,41 @@ import Svg exposing (Svg)
 import Svg.Attributes exposing (x, y, height, width, xlinkHref)
 
 
-type PlayerState
-    = NoPiecesPlaced
-    | Placed PlayerModel
-
-
 type alias PlayerModel =
-    { lastPosition : Maybe AxialCoord
-    , currentPosition : AxialCoord
+    { placedPieces :
+        List
+            { lastPosition : Maybe AxialCoord
+            , currentPosition : AxialCoord
+            , selected : Bool
+            }
     , score : Int
     , image : String
     }
+
+
+type PlayerMsg
+    = PlacePiece AxialCoord
+    | Selected
+
+
+updatePlayer : PlayerMsg -> PlayerModel -> PlayerModel
+updatePlayer msg model =
+    case msg of
+        PlacePiece coords ->
+            if (List.length model.placedPieces <= const.piecesPerPlayer) then
+                { model
+                    | placedPieces =
+                        { lastPosition = Nothing
+                        , currentPosition = coords
+                        , selected = False
+                        }
+                            :: model.placedPieces
+                }
+            else
+                model
+
+        Selected ->
+            model
 
 
 placePlayer : AxialCoord -> String -> List (Svg msg)
