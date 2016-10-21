@@ -2,6 +2,8 @@ module Model
     exposing
         ( Model
         , Board
+        , GameState(..)
+        , updateGameState
         , initialModel
         , emptyTile
         )
@@ -16,6 +18,12 @@ import Constants exposing (const)
 --Model
 
 
+type GameState
+    = PlayerOnePlacePiece
+    | PlayerTwoPlacePiece
+    | InPlay
+
+
 type alias Board =
     Dict AxialCoord HexModel
 
@@ -24,10 +32,7 @@ type alias Model =
     { board : Board
     , playerOne : PlayerModel
     , playerTwo : PlayerModel
-    , position :
-        { x : Int
-        , y : Int
-        }
+    , gameState : GameState
     }
 
 
@@ -44,7 +49,7 @@ initialModel =
         , score = 0
         , image = const.playerTwoImage
         }
-    , position = { x = 0, y = 0 }
+    , gameState = PlayerOnePlacePiece
     }
 
 
@@ -58,3 +63,13 @@ emptyTile =
     , shrinkFactor = const.hexShrinkFactor
     , occupied = False
     }
+
+
+updateGameState : GameState -> GameState
+updateGameState gameState =
+    if gameState == PlayerOnePlacePiece then
+        PlayerTwoPlacePiece
+    else if gameState == PlayerTwoPlacePiece then
+        PlayerOnePlacePiece
+    else
+        gameState

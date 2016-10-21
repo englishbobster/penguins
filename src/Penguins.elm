@@ -6,6 +6,8 @@ import Model
     exposing
         ( Model
         , Board
+        , GameState(..)
+        , updateGameState
         , initialModel
         , emptyTile
         )
@@ -55,7 +57,25 @@ update msg model =
                         , toFloat pos.y
                         )
             in
-                ( { model | playerOne = placePlayer posAsAxial model.playerOne }, Cmd.none )
+                case model.gameState of
+                    PlayerOnePlacePiece ->
+                        ( { model
+                            | playerOne = placePlayer posAsAxial model.playerOne
+                            , gameState = updateGameState model.gameState
+                          }
+                        , Cmd.none
+                        )
+
+                    PlayerTwoPlacePiece ->
+                        ( { model
+                            | playerTwo = placePlayer posAsAxial model.playerTwo
+                            , gameState = updateGameState model.gameState
+                          }
+                        , Cmd.none
+                        )
+
+                    InPlay ->
+                        ( model, Cmd.none )
 
 
 isAllowedMove : Board -> PlayerModel -> AxialCoord -> Bool
@@ -158,9 +178,9 @@ view model =
     div []
         [ Svg.svg
             [ height "1100", width "100%" ]
-            (List.append
-                (drawBoard model.board)
-                (drawPlayerPieces model.playerOne)
+            ((drawBoard model.board)
+                ++ (drawPlayerPieces model.playerOne)
+                ++ (drawPlayerPieces model.playerTwo)
             )
         , Html.text (toString model.playerOne)
         ]
