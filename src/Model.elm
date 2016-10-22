@@ -21,7 +21,8 @@ import Constants exposing (const)
 type GameState
     = PlayerOnePlacePiece
     | PlayerTwoPlacePiece
-    | InPlay
+    | PlayerOneMove
+    | PlayerTwoMove
 
 
 type alias Board =
@@ -65,11 +66,23 @@ emptyTile =
     }
 
 
-updateGameState : GameState -> GameState
-updateGameState gameState =
-    if gameState == PlayerOnePlacePiece then
+updateGameState : Model -> GameState
+updateGameState model =
+    if model.gameState == PlayerOnePlacePiece then
         PlayerTwoPlacePiece
-    else if gameState == PlayerTwoPlacePiece then
-        PlayerOnePlacePiece
+    else if model.gameState == PlayerTwoPlacePiece then
+        if
+            List.length model.playerOne.placedPieces
+                == const.piecesPerPlayer
+                && List.length model.playerTwo.placedPieces
+                == const.piecesPerPlayer
+        then
+            PlayerOneMove
+        else
+            PlayerOnePlacePiece
+    else if model.gameState == PlayerOneMove then
+        PlayerTwoMove
+    else if model.gameState == PlayerTwoMove then
+        PlayerOneMove
     else
-        gameState
+        model.gameState

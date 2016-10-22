@@ -60,21 +60,28 @@ update msg model =
                 case model.gameState of
                     PlayerOnePlacePiece ->
                         ( { model
-                            | playerOne = placePlayer posAsAxial model.playerOne
-                            , gameState = updateGameState model.gameState
+                            | playerOne =
+                                placePlayer posAsAxial model.playerOne
+                                --update tile state to occupied
+                            , gameState = updateGameState model
                           }
                         , Cmd.none
                         )
 
                     PlayerTwoPlacePiece ->
                         ( { model
-                            | playerTwo = placePlayer posAsAxial model.playerTwo
-                            , gameState = updateGameState model.gameState
+                            | playerTwo =
+                                placePlayer posAsAxial model.playerTwo
+                                --update tile state to occupied
+                            , gameState = updateGameState model
                           }
                         , Cmd.none
                         )
 
-                    InPlay ->
+                    PlayerOneMove ->
+                        ( model, Cmd.none )
+
+                    PlayerTwoMove ->
                         ( model, Cmd.none )
 
 
