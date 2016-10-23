@@ -1,7 +1,14 @@
 module Penguins exposing (..)
 
 import Hexagon exposing (HexModel, PixelCoord, hexagon)
-import Player exposing (PlayerModel, PlayerMsg(..), placePlayer, drawPlayerPieces)
+import Player
+    exposing
+        ( PlayerModel
+        , PlayerMsg(..)
+        , updatePlayer
+        , placePlayer
+        , drawPlayerPieces
+        )
 import Model
     exposing
         ( Model
@@ -72,7 +79,11 @@ update msg model =
                         ( model, Cmd.none )
 
         PlayerMessage msg ->
-            ( model, Cmd.none )
+            let
+                updatedPlayerModel =
+                    updatePlayer msg model.playerOne
+            in
+                ( { model | playerOne = updatedPlayerModel }, Cmd.none )
 
 
 updatePlayerOne : Model -> AxialCoord -> ( Model, Cmd Msg )

@@ -7,8 +7,10 @@ type alias Constants =
     , hexSize : Int
     , hexColour : String
     , hexShrinkFactor : Int
-    , playerOneImage : String
-    , playerTwoImage : String
+    , playerOneUnselectedImage : String
+    , playerTwoUnselectedImage : String
+    , playerOneSelectedImage : String
+    , playerTwoSelectedImage : String
     , piecesPerPlayer : Int
     }
 
@@ -20,7 +22,9 @@ const =
     , hexSize = 55
     , hexColour = "blue"
     , hexShrinkFactor = 5
-    , playerOneImage = "../graphics/batzmaru.svg"
-    , playerTwoImage = "../graphics/pengmaru.svg"
+    , playerOneUnselectedImage = "../graphics/batzmaru.svg"
+    , playerTwoUnselectedImage = "../graphics/pengmaru.svg"
+    , playerOneSelectedImage = "../graphics/batzmaru_selected.svg"
+    , playerTwoSelectedImage = "../graphics/pengmaru_selected.svg"
     , piecesPerPlayer = 3
     }

@@ -1,4 +1,4 @@
-module Player exposing (PlayerModel, PlayerMsg(..), placePlayer, drawPlayerPieces)
+module Player exposing (PlayerModel, PlayerMsg(..), updatePlayer, placePlayer, drawPlayerPieces)
 
 import Helpers exposing (AxialCoord, axialCoordsToPixel)
 import Constants exposing (const)
@@ -12,13 +12,15 @@ type alias Piece =
     { lastPosition : Maybe AxialCoord
     , currentPosition : AxialCoord
     , selected : Bool
+    , setImage : String
     }
 
 
 type alias PlayerModel =
     { placedPieces : List Piece
     , score : Int
-    , image : String
+    , unselectedImage : String
+    , selectedImage : String
     }
 
 
@@ -30,16 +32,19 @@ updatePlayer : PlayerMsg -> PlayerModel -> PlayerModel
 updatePlayer msg model =
     case msg of
         Select coords ->
-            { model | placedPieces = findAndUpdatePiece coords model.placedPieces }
+            { model
+                | placedPieces =
+                    findAndUpdatePiece coords model.selectedImage model.placedPieces
+            }
 
 
-findAndUpdatePiece : AxialCoord -> List Piece -> List Piece
-findAndUpdatePiece coords pieces =
+findAndUpdatePiece : AxialCoord -> String -> List Piece -> List Piece
+findAndUpdatePiece coords image pieces =
     let
         setSelected : Piece -> Piece
         setSelected piece =
             if (piece.currentPosition == coords) then
-                { piece | selected = True }
+                { piece | selected = True, setImage = image }
             else
                 piece
     in
@@ -54,6 +59,7 @@ placePlayer coords model =
                 { lastPosition = Nothing
                 , currentPosition = coords
                 , selected = False
+                , setImage = model.unselectedImage
                 }
                     :: model.placedPieces
         }
@@ -63,7 +69,7 @@ placePlayer coords model =
 
 drawPlayerPieces : PlayerModel -> List (Svg PlayerMsg)
 drawPlayerPieces model =
-    List.map (\piece -> drawPiece piece.currentPosition model.image) model.placedPieces
+    List.map (\piece -> drawPiece piece.currentPosition piece.setImage) model.placedPieces
 
 
 drawPiece : AxialCoord -> String -> Svg PlayerMsg
