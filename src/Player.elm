@@ -5,6 +5,7 @@ import Constants exposing (const)
 import Svg exposing (Svg)
 import Svg.Attributes exposing (x, y, height, width, xlinkHref)
 import Svg.Events exposing (onClick)
+import Array exposing (..)
 
 
 type alias Piece =
@@ -27,7 +28,22 @@ type PlayerMsg
 
 updatePlayer : PlayerMsg -> PlayerModel -> PlayerModel
 updatePlayer msg model =
-    model
+    case msg of
+        Select coords ->
+            { model | placedPieces = findAndUpdatePiece coords model.placedPieces }
+
+
+findAndUpdatePiece : AxialCoord -> List Piece -> List Piece
+findAndUpdatePiece coords pieces =
+    let
+        setSelected : Piece -> Piece
+        setSelected piece =
+            if (piece.currentPosition == coords) then
+                { piece | selected = True }
+            else
+                piece
+    in
+        List.map setSelected pieces
 
 
 placePlayer : AxialCoord -> PlayerModel -> PlayerModel

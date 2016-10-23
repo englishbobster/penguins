@@ -1,7 +1,7 @@
 module Penguins exposing (..)
 
 import Hexagon exposing (HexModel, PixelCoord, hexagon)
-import Player exposing (PlayerModel, placePlayer, drawPlayerPieces)
+import Player exposing (PlayerModel, PlayerMsg(..), placePlayer, drawPlayerPieces)
 import Model
     exposing
         ( Model
@@ -38,6 +38,7 @@ type Msg
     = NoOp
     | GenerateBoard Time
     | MousePos Position
+    | PlayerMessage PlayerMsg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -69,6 +70,9 @@ update msg model =
 
                     PlayerTwoMove ->
                         ( model, Cmd.none )
+
+        PlayerMessage msg ->
+            ( model, Cmd.none )
 
 
 updatePlayerOne : Model -> AxialCoord -> ( Model, Cmd Msg )
@@ -237,16 +241,28 @@ view model =
         [ Svg.svg
             [ height "1100", width "100%" ]
             ((drawBoard model.board)
-             --                ++ (drawPlayerPieces model.playerOne)
-             --                ++ (drawPlayerPieces model.playerTwo)
+                ++ (viewPlayerOnePieces model)
+                ++ (viewPlayerTwoPieces model)
             )
-        , Html.text (toString model)
         ]
 
 
+viewPlayerOnePieces : Model -> List (Svg Msg)
+viewPlayerOnePieces model =
+    List.map
+        (\svgmsg ->
+            App.map PlayerMessage (svgmsg)
+        )
+        (drawPlayerPieces model.playerOne)
 
---viewPieces : Model -> Svg Msg
---viewPieces model =
+
+viewPlayerTwoPieces : Model -> List (Svg Msg)
+viewPlayerTwoPieces model =
+    List.map
+        (\svgmsg ->
+            App.map PlayerMessage (svgmsg)
+        )
+        (drawPlayerPieces model.playerTwo)
 
 
 drawBoard : Board -> List (Svg Msg)
