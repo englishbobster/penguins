@@ -1,9 +1,10 @@
-module Player exposing (PlayerModel, placePlayer, drawPlayerPieces)
+module Player exposing (PlayerModel, PlayerMsg(..), placePlayer, drawPlayerPieces)
 
 import Helpers exposing (AxialCoord, axialCoordsToPixel)
 import Constants exposing (const)
 import Svg exposing (Svg)
 import Svg.Attributes exposing (x, y, height, width, xlinkHref)
+import Svg.Events exposing (onClick)
 
 
 type alias Piece =
@@ -18,6 +19,15 @@ type alias PlayerModel =
     , score : Int
     , image : String
     }
+
+
+type PlayerMsg
+    = Select AxialCoord
+
+
+updatePlayer : PlayerMsg -> PlayerModel -> PlayerModel
+updatePlayer msg model =
+    model
 
 
 placePlayer : AxialCoord -> PlayerModel -> PlayerModel
@@ -35,12 +45,12 @@ placePlayer coords model =
         model
 
 
-drawPlayerPieces : PlayerModel -> List (Svg msg)
+drawPlayerPieces : PlayerModel -> List (Svg PlayerMsg)
 drawPlayerPieces model =
     List.map (\piece -> drawPiece piece.currentPosition model.image) model.placedPieces
 
 
-drawPiece : AxialCoord -> String -> Svg msg
+drawPiece : AxialCoord -> String -> Svg PlayerMsg
 drawPiece coord image =
     let
         ( px, py ) =
@@ -52,7 +62,15 @@ drawPiece coord image =
         ypos =
             y (toString (py - const.playerSvgOffset))
     in
-        Svg.image [ xpos, ypos, height "50", width "50", xlinkHref image ] []
+        Svg.image
+            [ xpos
+            , ypos
+            , height "50"
+            , width "50"
+            , xlinkHref image
+            , onClick (Select coord)
+            ]
+            []
 
 
 allPiecesPlaced : PlayerModel -> Bool

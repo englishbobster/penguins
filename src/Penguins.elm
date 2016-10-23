@@ -237,11 +237,16 @@ view model =
         [ Svg.svg
             [ height "1100", width "100%" ]
             ((drawBoard model.board)
-                ++ (drawPlayerPieces model.playerOne)
-                ++ (drawPlayerPieces model.playerTwo)
+             --                ++ (drawPlayerPieces model.playerOne)
+             --                ++ (drawPlayerPieces model.playerTwo)
             )
         , Html.text (toString model)
         ]
+
+
+
+--viewPieces : Model -> Svg Msg
+--viewPieces model =
 
 
 drawBoard : Board -> List (Svg Msg)
