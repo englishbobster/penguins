@@ -71,12 +71,7 @@ updateGameState model =
     if model.gameState == PlayerOnePlacePiece then
         PlayerTwoPlacePiece
     else if model.gameState == PlayerTwoPlacePiece then
-        if
-            List.length model.playerOne.placedPieces
-                == const.piecesPerPlayer
-                && List.length model.playerTwo.placedPieces
-                == const.piecesPerPlayer
-        then
+        if ((List.length model.playerOne.placedPieces) == const.piecesPerPlayer) then
             PlayerOneMove
         else
             PlayerOnePlacePiece

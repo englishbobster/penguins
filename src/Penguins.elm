@@ -240,7 +240,7 @@ view model =
                 ++ (drawPlayerPieces model.playerOne)
                 ++ (drawPlayerPieces model.playerTwo)
             )
-        , Html.text (toString model.playerOne)
+        , Html.text (toString model)
         ]
 
 
