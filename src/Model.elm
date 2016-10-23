@@ -5,7 +5,7 @@ module Model
         , GameState(..)
         , updateGameState
         , initialModel
-        , emptyTile
+        , emptyHexagon
         )
 
 import Dict exposing (Dict)
@@ -54,8 +54,8 @@ initialModel =
     }
 
 
-emptyTile : HexModel
-emptyTile =
+emptyHexagon : HexModel
+emptyHexagon =
     { value = 0
     , border = "black"
     , colour = const.hexColour

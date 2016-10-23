@@ -6,13 +6,15 @@ import Svg exposing (Svg)
 import Svg.Attributes exposing (x, y, height, width, xlinkHref)
 
 
+type alias Piece =
+    { lastPosition : Maybe AxialCoord
+    , currentPosition : AxialCoord
+    , selected : Bool
+    }
+
+
 type alias PlayerModel =
-    { placedPieces :
-        List
-            { lastPosition : Maybe AxialCoord
-            , currentPosition : AxialCoord
-            , selected : Bool
-            }
+    { placedPieces : List Piece
     , score : Int
     , image : String
     }

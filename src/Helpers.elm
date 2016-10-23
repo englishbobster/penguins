@@ -6,7 +6,7 @@ module Helpers
         , pixelToAxialCoords
         )
 
-import Hexagon exposing (Coord)
+import Hexagon exposing (PixelCoord)
 
 
 type alias AxialCoord =
@@ -28,7 +28,7 @@ convertFromEvenQToAxial ( col, row ) =
         ( x, z )
 
 
-axialCoordsToPixel : Int -> AxialCoord -> Coord
+axialCoordsToPixel : Int -> AxialCoord -> PixelCoord
 axialCoordsToPixel size ( q, r ) =
     let
         offset =
@@ -43,7 +43,7 @@ axialCoordsToPixel size ( q, r ) =
         ( offset + x, offset + y )
 
 
-pixelToAxialCoords : Int -> Coord -> AxialCoord
+pixelToAxialCoords : Int -> PixelCoord -> AxialCoord
 pixelToAxialCoords size ( x, y ) =
     let
         offset =
@@ -64,7 +64,7 @@ pixelToAxialCoords size ( x, y ) =
         ( q, r ) |> roundAxialHex
 
 
-roundAxialHex : Coord -> AxialCoord
+roundAxialHex : PixelCoord -> AxialCoord
 roundAxialHex ( x, y ) =
     let
         z =

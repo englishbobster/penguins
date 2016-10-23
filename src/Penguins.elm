@@ -1,6 +1,6 @@
 module Penguins exposing (..)
 
-import Hexagon exposing (HexModel, Coord, hexagonFace)
+import Hexagon exposing (HexModel, PixelCoord, hexagon)
 import Player exposing (PlayerModel, placePlayer, drawPlayerPieces)
 import Model
     exposing
@@ -9,7 +9,7 @@ import Model
         , GameState(..)
         , updateGameState
         , initialModel
-        , emptyTile
+        , emptyHexagon
         )
 import Helpers
     exposing
@@ -59,30 +59,90 @@ update msg model =
             in
                 case model.gameState of
                     PlayerOnePlacePiece ->
-                        ( { model
-                            | playerOne =
-                                placePlayer posAsAxial model.playerOne
-                                --update tile state to occupied
-                            , gameState = updateGameState model
-                          }
-                        , Cmd.none
-                        )
+                        updatePlayerOne model posAsAxial
 
                     PlayerTwoPlacePiece ->
-                        ( { model
-                            | playerTwo =
-                                placePlayer posAsAxial model.playerTwo
-                                --update tile state to occupied
-                            , gameState = updateGameState model
-                          }
-                        , Cmd.none
-                        )
+                        updatePlayerTwo model posAsAxial
 
                     PlayerOneMove ->
                         ( model, Cmd.none )
 
                     PlayerTwoMove ->
                         ( model, Cmd.none )
+
+
+updatePlayerOne : Model -> AxialCoord -> ( Model, Cmd Msg )
+updatePlayerOne model coord =
+    if
+        (isHexagon model.board coord)
+            && not (isOccupiedHexagon model.board coord)
+    then
+        ( { model
+            | playerOne =
+                placePlayer coord model.playerOne
+            , board = occupyHexagon model.board coord
+            , gameState = updateGameState model
+          }
+        , Cmd.none
+        )
+    else
+        ( model, Cmd.none )
+
+
+updatePlayerTwo : Model -> AxialCoord -> ( Model, Cmd Msg )
+updatePlayerTwo model coord =
+    if
+        (isHexagon model.board coord)
+            && not (isOccupiedHexagon model.board coord)
+    then
+        ( { model
+            | playerTwo =
+                placePlayer coord model.playerTwo
+            , board = occupyHexagon model.board coord
+            , gameState = updateGameState model
+          }
+        , Cmd.none
+        )
+    else
+        ( model, Cmd.none )
+
+
+isHexagon : Board -> AxialCoord -> Bool
+isHexagon board coord =
+    let
+        coordList =
+            Dict.keys board
+    in
+        List.member coord coordList
+
+
+isOccupiedHexagon : Board -> AxialCoord -> Bool
+isOccupiedHexagon board coord =
+    let
+        hexagon =
+            Dict.get coord board
+    in
+        case hexagon of
+            Nothing ->
+                True
+
+            Just hexagon ->
+                hexagon.occupied
+
+
+occupyHexagon : Board -> AxialCoord -> Board
+occupyHexagon board coord =
+    let
+        occupied : Maybe HexModel -> Maybe HexModel
+        occupied maybeHex =
+            case maybeHex of
+                Nothing ->
+                    Just emptyHexagon
+
+                Just maybeHex ->
+                    Just { maybeHex | occupied = True }
+    in
+        Dict.update coord occupied board
 
 
 isAllowedMove : Board -> PlayerModel -> AxialCoord -> Bool
@@ -100,16 +160,7 @@ isAllowedMove board playermodel newPos =
         newz =
             0 - newx - newy
     in
-        True == isTile board newPos && (oldx == newx || oldy == newy || oldz == newz)
-
-
-isTile : Board -> AxialCoord -> Bool
-isTile board coord =
-    let
-        coordList =
-            Dict.keys board
-    in
-        List.member coord coordList
+        True == isHexagon board newPos && (oldx == newx || oldy == newy || oldz == newz)
 
 
 generateBoard : Time -> ( Int, Int ) -> Board
@@ -124,7 +175,7 @@ generateBoard timeAsSeed ( rows, columns ) =
         List.map2
             (\k v ->
                 ( k
-                , { emptyTile
+                , { emptyHexagon
                     | value = v
                     , center = (axialCoordsToPixel const.hexSize k)
                   }
@@ -196,12 +247,12 @@ view model =
 drawBoard : Board -> List (Svg Msg)
 drawBoard board =
     let
-        getTile : AxialCoord -> HexModel
-        getTile tileCoord =
+        getHexagon : AxialCoord -> HexModel
+        getHexagon tileCoord =
             Dict.get tileCoord board
-                |> Maybe.withDefault emptyTile
+                |> Maybe.withDefault emptyHexagon
     in
-        List.map (\key -> hexagonFace (getTile key)) (Dict.keys board)
+        List.map (\key -> hexagon (getHexagon key)) (Dict.keys board)
 
 
 

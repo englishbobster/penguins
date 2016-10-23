@@ -1,17 +1,16 @@
 module Hexagon
     exposing
         ( HexModel
-        , Coord
-        , hexagonFace
+        , PixelCoord
+        , hexagon
         )
 
 import String exposing (join)
 import Svg exposing (Svg, svg, text', text, polygon)
 import Svg.Attributes exposing (style, points, x, y, fontSize, dy)
-import Svg.Events exposing (onMouseOver)
 
 
-type alias Coord =
+type alias PixelCoord =
     ( Float, Float )
 
 
@@ -20,14 +19,14 @@ type alias HexModel =
     , size : Int
     , colour : String
     , value : Int
-    , center : Coord
+    , center : PixelCoord
     , occupied : Bool
     , shrinkFactor : Int
     }
 
 
-hexagonFace : HexModel -> Svg msg
-hexagonFace model =
+hexagon : HexModel -> Svg msg
+hexagon model =
     svg []
         [ polygon
             [ points (hexagonPoints model.center (model.size - model.shrinkFactor))
@@ -38,7 +37,7 @@ hexagonFace model =
         ]
 
 
-hexagonValue : Coord -> Int -> Svg msg
+hexagonValue : PixelCoord -> Int -> Svg msg
 hexagonValue center value =
     let
         ( xcenter, ycenter ) =
@@ -75,7 +74,7 @@ hexColour colour borderColour =
         )
 
 
-hexagonPoints : Coord -> Int -> String
+hexagonPoints : PixelCoord -> Int -> String
 hexagonPoints center size =
     [0..5]
         |> List.map (hexagonCorner center size)
@@ -83,7 +82,7 @@ hexagonPoints center size =
         |> join ","
 
 
-hexagonCorner : Coord -> Int -> Int -> Coord
+hexagonCorner : PixelCoord -> Int -> Int -> PixelCoord
 hexagonCorner center size cornerIndex =
     let
         angleRad =
