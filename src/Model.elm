@@ -50,7 +50,7 @@ initialModel =
         { placedPieces = []
         , score = 0
         , unselectedImage = const.playerTwoUnselectedImage
-        , selectedImage = const.playerOneSelectedImage
+        , selectedImage = const.playerTwoSelectedImage
         }
     , gameState = PlayerOnePlacePiece
     }

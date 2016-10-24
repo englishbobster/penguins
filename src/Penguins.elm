@@ -8,6 +8,7 @@ import Player
         , updatePlayer
         , placePlayer
         , drawPlayerPieces
+        , isAnyPieceSelected
         )
 import Model
     exposing
@@ -79,11 +80,22 @@ update msg model =
                         ( model, Cmd.none )
 
         PlayerMessage msg ->
-            let
-                updatedPlayerModel =
-                    updatePlayer msg model.playerOne
-            in
-                ( { model | playerOne = updatedPlayerModel }, Cmd.none )
+            if
+                (model.gameState
+                    == PlayerOneMove
+                    && not (isAnyPieceSelected model.playerOne)
+                )
+            then
+                ( { model | playerOne = updatePlayer msg model.playerOne }, Cmd.none )
+            else if
+                (model.gameState
+                    == PlayerTwoMove
+                    && not (isAnyPieceSelected model.playerTwo)
+                )
+            then
+                ( { model | playerTwo = updatePlayer msg model.playerTwo }, Cmd.none )
+            else
+                ( model, Cmd.none )
 
 
 updatePlayerOne : Model -> AxialCoord -> ( Model, Cmd Msg )

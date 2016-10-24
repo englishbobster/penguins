@@ -1,4 +1,4 @@
-module Player exposing (PlayerModel, PlayerMsg(..), updatePlayer, placePlayer, drawPlayerPieces)
+module Player exposing (PlayerModel, PlayerMsg(..), updatePlayer, placePlayer, drawPlayerPieces, isAnyPieceSelected)
 
 import Helpers exposing (AxialCoord, axialCoordsToPixel)
 import Constants exposing (const)
@@ -49,6 +49,15 @@ findAndUpdatePiece coords image pieces =
                 piece
     in
         List.map setSelected pieces
+
+
+isAnyPieceSelected : PlayerModel -> Bool
+isAnyPieceSelected model =
+    let
+        selectedPieces =
+            List.filter (\piece -> piece.selected == True) model.placedPieces
+    in
+        not (List.isEmpty selectedPieces)
 
 
 placePlayer : AxialCoord -> PlayerModel -> PlayerModel
