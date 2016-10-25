@@ -9,6 +9,7 @@ module Model
         )
 
 import Dict exposing (Dict)
+import Array exposing (empty)
 import Hexagon exposing (HexModel)
 import Player exposing (PlayerModel)
 import Helpers exposing (AxialCoord)
@@ -41,13 +42,15 @@ initialModel : Model
 initialModel =
     { board = Dict.empty
     , playerOne =
-        { placedPieces = []
+        { placedPieces = Array.empty
+        , indexSelected = Nothing
         , score = 0
         , unselectedImage = const.playerOneUnselectedImage
         , selectedImage = const.playerOneSelectedImage
         }
     , playerTwo =
-        { placedPieces = []
+        { placedPieces = Array.empty
+        , indexSelected = Nothing
         , score = 0
         , unselectedImage = const.playerTwoUnselectedImage
         , selectedImage = const.playerTwoSelectedImage
@@ -73,7 +76,7 @@ updateGameState model =
     if model.gameState == PlayerOnePlacePiece then
         PlayerTwoPlacePiece
     else if model.gameState == PlayerTwoPlacePiece then
-        if ((List.length model.playerOne.placedPieces) == const.piecesPerPlayer) then
+        if ((Array.length model.playerOne.placedPieces) == const.piecesPerPlayer) then
             PlayerOneMove
         else
             PlayerOnePlacePiece

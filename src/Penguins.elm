@@ -28,7 +28,7 @@ import Helpers
         )
 import Constants exposing (const)
 import Dict exposing (Dict, empty, insert)
-import Html exposing (Html, div)
+import Html exposing (Html, div, text)
 import Html.App as App
 import Svg exposing (Svg)
 import Svg.Attributes exposing (height, width)
@@ -80,19 +80,9 @@ update msg model =
                         ( model, Cmd.none )
 
         PlayerMessage msg ->
-            if
-                (model.gameState
-                    == PlayerOneMove
-                    && not (isAnyPieceSelected model.playerOne)
-                )
-            then
+            if (model.gameState == PlayerOneMove) then
                 ( { model | playerOne = updatePlayer msg model.playerOne }, Cmd.none )
-            else if
-                (model.gameState
-                    == PlayerTwoMove
-                    && not (isAnyPieceSelected model.playerTwo)
-                )
-            then
+            else if (model.gameState == PlayerTwoMove) then
                 ( { model | playerTwo = updatePlayer msg model.playerTwo }, Cmd.none )
             else
                 ( model, Cmd.none )
@@ -267,6 +257,10 @@ view model =
                 ++ (viewPlayerOnePieces model)
                 ++ (viewPlayerTwoPieces model)
             )
+        , text (toString model.gameState)
+        , text (toString model.playerOne)
+        , text "\n"
+        , text (toString model.playerTwo)
         ]
 
 

@@ -5,19 +5,19 @@ import Constants exposing (const)
 import Svg exposing (Svg)
 import Svg.Attributes exposing (x, y, height, width, xlinkHref)
 import Svg.Events exposing (onClick)
-import Array exposing (..)
+import Array exposing (Array, push, toList, length, get, toIndexedList)
 
 
 type alias Piece =
     { lastPosition : Maybe AxialCoord
     , currentPosition : AxialCoord
-    , selected : Bool
     , setImage : String
     }
 
 
 type alias PlayerModel =
-    { placedPieces : List Piece
+    { placedPieces : Array Piece
+    , indexSelected : Maybe Int
     , score : Int
     , unselectedImage : String
     , selectedImage : String
@@ -32,53 +32,73 @@ updatePlayer : PlayerMsg -> PlayerModel -> PlayerModel
 updatePlayer msg model =
     case msg of
         Select coords ->
-            { model
-                | placedPieces =
-                    findAndUpdatePiece coords model.selectedImage model.placedPieces
-            }
+            let
+                ( index, piece ) =
+                    selectPiece coords model
+            in
+                { model
+                    | placedPieces = updatePieces index piece model
+                    , indexSelected = Just index
+                }
 
 
-findAndUpdatePiece : AxialCoord -> String -> List Piece -> List Piece
-findAndUpdatePiece coords image pieces =
+updatePieces : Int -> Piece -> PlayerModel -> Array Piece
+updatePieces index piece model =
     let
-        setSelected : Piece -> Piece
-        setSelected piece =
-            if (piece.currentPosition == coords) then
-                { piece | selected = True, setImage = image }
-            else
-                piece
+        pieceToSet =
+            { piece | setImage = model.selectedImage }
     in
-        List.map setSelected pieces
+        model.placedPieces
+            |> Array.map (\piece -> { piece | setImage = model.unselectedImage })
+            |> Array.set index pieceToSet
+
+
+selectPiece : AxialCoord -> PlayerModel -> ( Int, Piece )
+selectPiece coords model =
+    Array.toIndexedList model.placedPieces
+        |> List.filter (\( index, piece ) -> piece.currentPosition == coords)
+        |> List.head
+        |> Maybe.withDefault
+            ( 3
+            , { lastPosition = Nothing
+              , currentPosition = ( 0, 0 )
+              , setImage = " "
+              }
+            )
 
 
 isAnyPieceSelected : PlayerModel -> Bool
 isAnyPieceSelected model =
-    let
-        selectedPieces =
-            List.filter (\piece -> piece.selected == True) model.placedPieces
-    in
-        not (List.isEmpty selectedPieces)
+    case model.indexSelected of
+        Nothing ->
+            False
+
+        Just index ->
+            True
 
 
 placePlayer : AxialCoord -> PlayerModel -> PlayerModel
 placePlayer coords model =
-    if not (allPiecesPlaced model) then
-        { model
-            | placedPieces =
-                { lastPosition = Nothing
-                , currentPosition = coords
-                , selected = False
-                , setImage = model.unselectedImage
-                }
-                    :: model.placedPieces
-        }
-    else
-        model
+    let
+        newPiece =
+            { lastPosition = Nothing
+            , currentPosition = coords
+            , setImage = model.unselectedImage
+            }
+    in
+        if not (allPiecesPlaced model) then
+            { model
+                | placedPieces =
+                    Array.push newPiece model.placedPieces
+            }
+        else
+            model
 
 
 drawPlayerPieces : PlayerModel -> List (Svg PlayerMsg)
 drawPlayerPieces model =
-    List.map (\piece -> drawPiece piece.currentPosition piece.setImage) model.placedPieces
+    Array.toList model.placedPieces
+        |> List.map (\piece -> drawPiece piece.currentPosition piece.setImage)
 
 
 drawPiece : AxialCoord -> String -> Svg PlayerMsg
@@ -106,4 +126,4 @@ drawPiece coord image =
 
 allPiecesPlaced : PlayerModel -> Bool
 allPiecesPlaced model =
-    False == (List.length model.placedPieces < const.piecesPerPlayer)
+    False == (Array.length model.placedPieces < const.piecesPerPlayer)
