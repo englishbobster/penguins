@@ -10,6 +10,7 @@ import Player
         , drawPlayerPieces
         , getSelectedPiece
         , isPieceSelected
+        , updatePiecesForMove
         )
 import Model
     exposing
@@ -78,7 +79,7 @@ update msg model =
                         movePlayerOne model posAsAxial
 
                     PlayerTwoMove ->
-                        movePlayerOne model posAsAxial
+                        movePlayerTwo model posAsAxial
 
         PlayerMessage msg ->
             if (model.gameState == PlayerOneMove) then
@@ -131,7 +132,12 @@ movePlayerOne model coord =
         (isAllowedMove model.board model.playerOne coord)
             && (isPieceSelected model.playerOne)
     then
-        ( model, Cmd.none )
+        ( { model
+            | playerOne = movePiece model.playerOne coord
+            , gameState = updateGameState model
+          }
+        , Cmd.none
+        )
     else
         ( model, Cmd.none )
 
@@ -142,9 +148,29 @@ movePlayerTwo model coord =
         (isAllowedMove model.board model.playerTwo coord)
             && (isPieceSelected model.playerTwo)
     then
-        ( model, Cmd.none )
+        ( { model
+            | playerTwo = movePiece model.playerTwo coord
+            , gameState = updateGameState model
+          }
+        , Cmd.none
+        )
     else
         ( model, Cmd.none )
+
+
+movePiece : PlayerModel -> AxialCoord -> PlayerModel
+movePiece model coord =
+    let
+        selectedPiece =
+            getSelectedPiece model
+
+        index =
+            Maybe.withDefault 0 model.indexSelected
+    in
+        { model
+            | placedPieces =
+                updatePiecesForMove index selectedPiece coord model
+        }
 
 
 isAllowedMove : Board -> PlayerModel -> AxialCoord -> Bool

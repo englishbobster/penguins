@@ -7,6 +7,7 @@ module Player
         , drawPlayerPieces
         , isPieceSelected
         , getSelectedPiece
+        , updatePiecesForMove
         )
 
 import Helpers exposing (AxialCoord, axialCoordsToPixel)
@@ -43,16 +44,16 @@ updatePlayer msg model =
         Select coords ->
             let
                 ( index, piece ) =
-                    findPiece coords model
+                    findPieceByCoords coords model
             in
                 { model
-                    | placedPieces = updatePieces index piece model
+                    | placedPieces = updatePiecesForSelection index piece model
                     , indexSelected = Just index
                 }
 
 
-updatePieces : Int -> Piece -> PlayerModel -> Array Piece
-updatePieces index piece model =
+updatePiecesForSelection : Int -> Piece -> PlayerModel -> Array Piece
+updatePiecesForSelection index piece model =
     let
         pieceToSet =
             { piece | setImage = model.selectedImage }
@@ -62,8 +63,22 @@ updatePieces index piece model =
             |> Array.set index pieceToSet
 
 
-findPiece : AxialCoord -> PlayerModel -> ( Int, Piece )
-findPiece coords model =
+updatePiecesForMove : Int -> Piece -> AxialCoord -> PlayerModel -> Array Piece
+updatePiecesForMove index piece coord model =
+    let
+        pieceToSet =
+            { piece
+                | lastPosition = Just piece.currentPosition
+                , currentPosition = coord
+                , setImage = model.unselectedImage
+            }
+    in
+        model.placedPieces
+            |> Array.set index pieceToSet
+
+
+findPieceByCoords : AxialCoord -> PlayerModel -> ( Int, Piece )
+findPieceByCoords coords model =
     Array.toIndexedList model.placedPieces
         |> List.filter (\( index, piece ) -> piece.currentPosition == coords)
         |> List.head
