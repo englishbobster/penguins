@@ -8,7 +8,8 @@ import Player
         , updatePlayer
         , placePlayer
         , drawPlayerPieces
-        , isAnyPieceSelected
+        , getSelectedPiece
+        , isPieceSelected
         )
 import Model
     exposing
@@ -68,16 +69,16 @@ update msg model =
             in
                 case model.gameState of
                     PlayerOnePlacePiece ->
-                        updatePlayerOne model posAsAxial
+                        placePlayerOne model posAsAxial
 
                     PlayerTwoPlacePiece ->
-                        updatePlayerTwo model posAsAxial
+                        placePlayerTwo model posAsAxial
 
                     PlayerOneMove ->
-                        ( model, Cmd.none )
+                        movePlayerOne model posAsAxial
 
                     PlayerTwoMove ->
-                        ( model, Cmd.none )
+                        movePlayerOne model posAsAxial
 
         PlayerMessage msg ->
             if (model.gameState == PlayerOneMove) then
@@ -88,8 +89,8 @@ update msg model =
                 ( model, Cmd.none )
 
 
-updatePlayerOne : Model -> AxialCoord -> ( Model, Cmd Msg )
-updatePlayerOne model coord =
+placePlayerOne : Model -> AxialCoord -> ( Model, Cmd Msg )
+placePlayerOne model coord =
     if
         (isHexagon model.board coord)
             && not (isOccupiedHexagon model.board coord)
@@ -106,8 +107,8 @@ updatePlayerOne model coord =
         ( model, Cmd.none )
 
 
-updatePlayerTwo : Model -> AxialCoord -> ( Model, Cmd Msg )
-updatePlayerTwo model coord =
+placePlayerTwo : Model -> AxialCoord -> ( Model, Cmd Msg )
+placePlayerTwo model coord =
     if
         (isHexagon model.board coord)
             && not (isOccupiedHexagon model.board coord)
@@ -122,6 +123,52 @@ updatePlayerTwo model coord =
         )
     else
         ( model, Cmd.none )
+
+
+movePlayerOne : Model -> AxialCoord -> ( Model, Cmd Msg )
+movePlayerOne model coord =
+    if
+        (isAllowedMove model.board model.playerOne coord)
+            && (isPieceSelected model.playerOne)
+    then
+        ( model, Cmd.none )
+    else
+        ( model, Cmd.none )
+
+
+movePlayerTwo : Model -> AxialCoord -> ( Model, Cmd Msg )
+movePlayerTwo model coord =
+    if
+        (isAllowedMove model.board model.playerTwo coord)
+            && (isPieceSelected model.playerTwo)
+    then
+        ( model, Cmd.none )
+    else
+        ( model, Cmd.none )
+
+
+isAllowedMove : Board -> PlayerModel -> AxialCoord -> Bool
+isAllowedMove board playermodel newPos =
+    let
+        selectedPiece =
+            getSelectedPiece playermodel
+
+        ( oldx, oldy ) =
+            selectedPiece.currentPosition
+
+        ( newx, newy ) =
+            newPos
+
+        oldz =
+            0 - oldx - oldy
+
+        newz =
+            0 - newx - newy
+    in
+        True
+            == isHexagon board newPos
+            && not (isOccupiedHexagon board newPos)
+            && (oldx == newx || oldy == newy || oldz == newz)
 
 
 isHexagon : Board -> AxialCoord -> Bool
@@ -160,24 +207,6 @@ occupyHexagon board coord =
                     Just { maybeHex | occupied = True }
     in
         Dict.update coord occupied board
-
-
-isAllowedMove : Board -> PlayerModel -> AxialCoord -> Bool
-isAllowedMove board playermodel newPos =
-    let
-        ( oldx, oldy ) =
-            ( 0, 0 )
-
-        ( newx, newy ) =
-            newPos
-
-        oldz =
-            0 - oldx - oldy
-
-        newz =
-            0 - newx - newy
-    in
-        True == isHexagon board newPos && (oldx == newx || oldy == newy || oldz == newz)
 
 
 generateBoard : Time -> ( Int, Int ) -> Board

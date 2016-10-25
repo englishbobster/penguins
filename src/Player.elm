@@ -1,4 +1,13 @@
-module Player exposing (PlayerModel, PlayerMsg(..), updatePlayer, placePlayer, drawPlayerPieces, isAnyPieceSelected)
+module Player
+    exposing
+        ( PlayerModel
+        , PlayerMsg(..)
+        , updatePlayer
+        , placePlayer
+        , drawPlayerPieces
+        , isPieceSelected
+        , getSelectedPiece
+        )
 
 import Helpers exposing (AxialCoord, axialCoordsToPixel)
 import Constants exposing (const)
@@ -34,7 +43,7 @@ updatePlayer msg model =
         Select coords ->
             let
                 ( index, piece ) =
-                    selectPiece coords model
+                    findPiece coords model
             in
                 { model
                     | placedPieces = updatePieces index piece model
@@ -53,8 +62,8 @@ updatePieces index piece model =
             |> Array.set index pieceToSet
 
 
-selectPiece : AxialCoord -> PlayerModel -> ( Int, Piece )
-selectPiece coords model =
+findPiece : AxialCoord -> PlayerModel -> ( Int, Piece )
+findPiece coords model =
     Array.toIndexedList model.placedPieces
         |> List.filter (\( index, piece ) -> piece.currentPosition == coords)
         |> List.head
@@ -67,8 +76,26 @@ selectPiece coords model =
             )
 
 
-isAnyPieceSelected : PlayerModel -> Bool
-isAnyPieceSelected model =
+getSelectedPiece : PlayerModel -> Piece
+getSelectedPiece model =
+    case model.indexSelected of
+        Nothing ->
+            { lastPosition = Nothing
+            , currentPosition = ( 0, 0 )
+            , setImage = " "
+            }
+
+        Just index ->
+            Array.get index model.placedPieces
+                |> Maybe.withDefault
+                    { lastPosition = Nothing
+                    , currentPosition = ( 0, 0 )
+                    , setImage = " "
+                    }
+
+
+isPieceSelected : PlayerModel -> Bool
+isPieceSelected model =
     case model.indexSelected of
         Nothing ->
             False
