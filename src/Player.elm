@@ -25,6 +25,13 @@ type alias Piece =
     }
 
 
+dummyPiece =
+    { lastPosition = Nothing
+    , currentPosition = ( 100, 100 )
+    , setImage = ""
+    }
+
+
 type alias PlayerModel =
     { placedPieces : Array Piece
     , indexSelected : Maybe Int
@@ -82,31 +89,18 @@ findPieceByCoords coords model =
     Array.toIndexedList model.placedPieces
         |> List.filter (\( index, piece ) -> piece.currentPosition == coords)
         |> List.head
-        |> Maybe.withDefault
-            ( 3
-            , { lastPosition = Nothing
-              , currentPosition = ( 0, 0 )
-              , setImage = " "
-              }
-            )
+        |> Maybe.withDefault ( 3, dummyPiece )
 
 
 getSelectedPiece : PlayerModel -> Piece
 getSelectedPiece model =
     case model.indexSelected of
         Nothing ->
-            { lastPosition = Nothing
-            , currentPosition = ( 0, 0 )
-            , setImage = " "
-            }
+            dummyPiece
 
         Just index ->
             Array.get index model.placedPieces
-                |> Maybe.withDefault
-                    { lastPosition = Nothing
-                    , currentPosition = ( 0, 0 )
-                    , setImage = " "
-                    }
+                |> Maybe.withDefault dummyPiece
 
 
 isPieceSelected : PlayerModel -> Bool

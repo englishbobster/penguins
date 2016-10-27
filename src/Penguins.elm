@@ -135,6 +135,7 @@ movePlayerOne model coord =
         ( { model
             | playerOne = movePiece model.playerOne coord
             , gameState = updateGameState model
+            , board = occupyHexagon model.board coord
           }
         , Cmd.none
         )
@@ -151,6 +152,7 @@ movePlayerTwo model coord =
         ( { model
             | playerTwo = movePiece model.playerTwo coord
             , gameState = updateGameState model
+            , board = occupyHexagon model.board coord
           }
         , Cmd.none
         )
@@ -165,11 +167,12 @@ movePiece model coord =
             getSelectedPiece model
 
         index =
-            Maybe.withDefault 0 model.indexSelected
+            Maybe.withDefault 4 model.indexSelected
     in
         { model
             | placedPieces =
                 updatePiecesForMove index selectedPiece coord model
+            , indexSelected = Nothing
         }
 
 
@@ -312,10 +315,9 @@ view model =
                 ++ (viewPlayerOnePieces model)
                 ++ (viewPlayerTwoPieces model)
             )
-        , text (toString model.gameState)
-        , text (toString model.playerOne)
-        , text "\n"
-        , text (toString model.playerTwo)
+        , div [] [ text (toString model.gameState) ]
+        , div [] [ text (toString model.playerOne) ]
+        , div [] [ text (toString model.playerTwo) ]
         ]
 
 
