@@ -13,7 +13,11 @@ type alias AxialCoord =
     ( Int, Int )
 
 
-convertFromEvenQToAxial : ( Int, Int ) -> AxialCoord
+type alias EvenQ =
+    ( Int, Int )
+
+
+convertFromEvenQToAxial : EvenQ -> AxialCoord
 convertFromEvenQToAxial ( col, row ) =
     let
         x =
@@ -62,6 +66,27 @@ pixelToAxialCoords size ( x, y ) =
             ((-ox / 3) + (((sqrt 3) / 3) * oy)) / (toFloat size)
     in
         ( q, r ) |> roundAxialHex
+
+
+calculateDistanceBetweenCenters : AxialCoord -> AxialCoord -> Int
+calculateDistanceBetweenCenters ( startx, starty ) ( finishx, finishy ) =
+    let
+        startz =
+            0 - startx - starty
+
+        finishz =
+            0 - finishx - finishy
+
+        dx =
+            abs (startx - finishx)
+
+        dy =
+            abs (starty - finishy)
+
+        dz =
+            abs (startz - finishz)
+    in
+        Maybe.withDefault 0 (List.maximum [ dx, dy, dz ])
 
 
 roundAxialHex : PixelCoord -> AxialCoord

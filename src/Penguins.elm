@@ -134,8 +134,10 @@ movePlayerOne model coord =
     then
         ( { model
             | playerOne = movePiece model.playerOne coord
+            , board =
+                occupyHexagon model.board coord
+                --must also delete tiles here
             , gameState = updateGameState model
-            , board = occupyHexagon model.board coord
           }
         , Cmd.none
         )
@@ -151,8 +153,8 @@ movePlayerTwo model coord =
     then
         ( { model
             | playerTwo = movePiece model.playerTwo coord
-            , gameState = updateGameState model
             , board = occupyHexagon model.board coord
+            , gameState = updateGameState model
           }
         , Cmd.none
         )
@@ -197,7 +199,9 @@ isAllowedMove board playermodel newPos =
         True
             == isHexagon board newPos
             && not (isOccupiedHexagon board newPos)
-            && (oldx == newx || oldy == newy || oldz == newz)
+            --must check if path blocked by a piece, opponent or otherwise
+            &&
+                (oldx == newx || oldy == newy || oldz == newz)
 
 
 isHexagon : Board -> AxialCoord -> Bool
