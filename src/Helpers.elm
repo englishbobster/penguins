@@ -4,8 +4,7 @@ module Helpers
         , convertFromEvenQToAxial
         , axialCoordsToPixel
         , pixelToAxialCoords
-        , calculateDistanceBetweenCenters
-        , interpolateRoute
+        , calculateRoute
         )
 
 import Hexagon exposing (PixelCoord)
@@ -89,6 +88,15 @@ calculateDistanceBetweenCenters ( startx, starty ) ( finishx, finishy ) =
             abs (startz - finishz)
     in
         Maybe.withDefault 0 (List.maximum [ dx, dy, dz ])
+
+
+calculateRoute : AxialCoord -> AxialCoord -> List AxialCoord
+calculateRoute start finish =
+    let
+        distance =
+            calculateDistanceBetweenCenters start finish
+    in
+        start :: interpolateRoute start finish distance distance []
 
 
 interpolateRoute : AxialCoord -> AxialCoord -> Int -> Int -> List AxialCoord -> List AxialCoord

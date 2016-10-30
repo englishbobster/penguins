@@ -27,6 +27,7 @@ import Helpers
         , convertFromEvenQToAxial
         , axialCoordsToPixel
         , pixelToAxialCoords
+        , calculateRoute
         )
 import Constants exposing (const)
 import Dict exposing (Dict, empty, insert)
@@ -133,7 +134,9 @@ movePlayerOne model coord =
             && (isPieceSelected model.playerOne)
     then
         ( { model
-            | playerOne = movePiece model.playerOne coord
+            | playerOne =
+                movePiece model.playerOne coord
+                --update score as well
             , board =
                 occupyHexagon model.board coord
                 --must also delete tiles here
@@ -152,8 +155,12 @@ movePlayerTwo model coord =
             && (isPieceSelected model.playerTwo)
     then
         ( { model
-            | playerTwo = movePiece model.playerTwo coord
-            , board = occupyHexagon model.board coord
+            | playerTwo =
+                movePiece model.playerTwo coord
+                --update score as well
+            , board =
+                occupyHexagon model.board coord
+                --must also delete tiles here
             , gameState = updateGameState model
           }
         , Cmd.none

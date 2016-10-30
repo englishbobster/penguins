@@ -27,20 +27,16 @@ all =
             \() ->
                 Expect.equal (List.take 1 (Penguins.generateMapKeys 6 6 |> List.reverse))
                     [ ( 5, 3 ) ]
-        , test "should calculate the distance between (3, 3) and (3, 8)" <|
+        , test "calculated route should have a length of 6 including start and finish" <|
             \() ->
-                Expect.equal (Helpers.calculateDistanceBetweenCenters ( 3, 3 ) ( 3, 8 ))
-                    5
-        , test "interpolated route should have a length of 5" <|
-            \() ->
-                Expect.equal (Helpers.interpolateRoute ( 3, 3 ) ( 3, 8 ) 5 5 [] |> List.length)
-                    5
+                Expect.equal (Helpers.calculateRoute ( 3, 3 ) ( 3, 8 ) |> List.length)
+                    6
         , test "interpolated route gives correct route" <|
             \() ->
-                Expect.equal (Helpers.interpolateRoute ( 3, 3 ) ( 3, 8 ) 5 5 [])
-                    [ ( 3, 4 ), ( 3, 5 ), ( 3, 6 ), ( 3, 7 ), ( 3, 8 ) ]
+                Expect.equal (Helpers.calculateRoute ( 3, 3 ) ( 3, 8 ))
+                    [ ( 3, 3 ), ( 3, 4 ), ( 3, 5 ), ( 3, 6 ), ( 3, 7 ), ( 3, 8 ) ]
         , test "interpolated route gives another correct route" <|
             \() ->
-                Expect.equal (Helpers.interpolateRoute ( 4, 1 ) ( 8, 1 ) 4 4 [])
-                    [ ( 5, 1 ), ( 6, 1 ), ( 7, 1 ), ( 8, 1 ) ]
+                Expect.equal (Helpers.calculateRoute ( 4, 1 ) ( 8, 1 ))
+                    [ ( 4, 1 ), ( 5, 1 ), ( 6, 1 ), ( 7, 1 ), ( 8, 1 ) ]
         ]
