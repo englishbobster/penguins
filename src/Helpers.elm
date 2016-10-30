@@ -4,6 +4,7 @@ module Helpers
         , convertFromEvenQToAxial
         , axialCoordsToPixel
         , pixelToAxialCoords
+        , calculateDistanceBetweenCenters
         )
 
 import Hexagon exposing (PixelCoord)
@@ -87,6 +88,31 @@ calculateDistanceBetweenCenters ( startx, starty ) ( finishx, finishy ) =
             abs (startz - finishz)
     in
         Maybe.withDefault 0 (List.maximum [ dx, dy, dz ])
+
+
+interpolateRoute : AxialCoord -> AxialCoord -> Int -> Int -> List AxialCoord -> List AxialCoord
+interpolateRoute start finish distance step currentRoute =
+    if step == 0 then
+        currentRoute
+    else
+        let
+            ( startx, starty ) =
+                start
+
+            ( finishx, finishy ) =
+                finish
+
+            lerp : Float -> Float -> Float
+            lerp a b =
+                a + (b - a) * (1 / (toFloat distance)) * step
+
+            next =
+                ( (lerp (toFloat startx) (toFloat finishx))
+                , (lerp (toFloat starty) (toFloat finishy))
+                )
+                    |> roundAxialHex
+        in
+            interpolateRoute start finish distance (step - 1) (next :: currentRoute)
 
 
 roundAxialHex : PixelCoord -> AxialCoord
