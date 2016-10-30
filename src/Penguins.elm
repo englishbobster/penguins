@@ -30,7 +30,7 @@ import Helpers
         , calculateRoute
         )
 import Constants exposing (const)
-import Dict exposing (Dict, empty, insert)
+import Dict exposing (Dict, empty, insert, filter)
 import Html exposing (Html, div, text)
 import Html.App as App
 import Svg exposing (Svg)
@@ -125,6 +125,31 @@ placePlayerTwo model coord =
         )
     else
         ( model, Cmd.none )
+
+
+removeTilesAndCollectScore : AxialCoord -> AxialCoord -> Board -> ( Int, Board )
+removeTilesAndCollectScore start stop board =
+    let
+        routeKeyList =
+            playerPath start stop
+
+        ( pathTiles, newBoard ) =
+            Dict.partition (\k v -> List.member k routeKeyList) board
+
+        score =
+            List.map (\tile -> tile.value) (Dict.values pathTiles)
+                |> List.foldr (+) 0
+    in
+        ( score, newBoard )
+
+
+playerPath : AxialCoord -> AxialCoord -> List AxialCoord
+playerPath start stop =
+    let
+        route =
+            calculateRoute start stop
+    in
+        route |> List.take (List.length route - 1)
 
 
 movePlayerOne : Model -> AxialCoord -> ( Model, Cmd Msg )
