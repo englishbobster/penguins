@@ -5,6 +5,7 @@ module Helpers
         , axialCoordsToPixel
         , pixelToAxialCoords
         , calculateDistanceBetweenCenters
+        , interpolateRoute
         )
 
 import Hexagon exposing (PixelCoord)

@@ -26,4 +26,13 @@ all =
         , test "should calculate the distance between (3, 3) and (3, 8)" <|
             \() ->
                 Expect.equal (Helpers.calculateDistanceBetweenCenters ( 3, 3 ) ( 3, 8 )) 5
+        , test "interpolated route should have a length of 5" <|
+            \() ->
+                Expect.equal (Helpers.interpolateRoute ( 3, 3 ) ( 3, 8 ) 5 5 [] |> List.length) 5
+        , test "interpolated route gives correct route" <|
+            \() ->
+                Expect.equal (Helpers.interpolateRoute ( 3, 3 ) ( 3, 8 ) 5 5 []) [ ( 3, 4 ), ( 3, 5 ), ( 3, 6 ), ( 3, 7 ), ( 3, 8 ) ]
+        , test "interpolated route gives another correct route" <|
+            \() ->
+                Expect.equal (Helpers.interpolateRoute ( 4, 1 ) ( 8, 1 ) 4 4 []) [ ( 5, 1 ), ( 6, 1 ), ( 7, 1 ), ( 8, 1 ) ]
         ]
