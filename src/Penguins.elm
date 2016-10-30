@@ -158,17 +158,17 @@ movePlayerOne model coord =
         (isAllowedMove model.board model.playerOne coord)
             && (isPieceSelected model.playerOne)
     then
-        ( { model
-            | playerOne =
-                movePiece model.playerOne coord
-                --update score as well
-            , board =
-                occupyHexagon model.board coord
-                --must also delete tiles here
-            , gameState = updateGameState model
-          }
-        , Cmd.none
-        )
+        let
+            ( boardUpdate, playerUpdate ) =
+                movePiece model.playerOne coord model.board
+        in
+            ( { model
+                | playerOne = playerUpdate
+                , board = occupyHexagon boardUpdate coord
+                , gameState = updateGameState model
+              }
+            , Cmd.none
+            )
     else
         ( model, Cmd.none )
 
@@ -179,35 +179,41 @@ movePlayerTwo model coord =
         (isAllowedMove model.board model.playerTwo coord)
             && (isPieceSelected model.playerTwo)
     then
-        ( { model
-            | playerTwo =
-                movePiece model.playerTwo coord
-                --update score as well
-            , board =
-                occupyHexagon model.board coord
-                --must also delete tiles here
-            , gameState = updateGameState model
-          }
-        , Cmd.none
-        )
+        let
+            ( boardUpdate, playerUpdate ) =
+                movePiece model.playerTwo coord model.board
+        in
+            ( { model
+                | playerTwo = playerUpdate
+                , board = occupyHexagon boardUpdate coord
+                , gameState = updateGameState model
+              }
+            , Cmd.none
+            )
     else
         ( model, Cmd.none )
 
 
-movePiece : PlayerModel -> AxialCoord -> PlayerModel
-movePiece model coord =
+movePiece : PlayerModel -> AxialCoord -> Board -> ( Board, PlayerModel )
+movePiece model coord board =
     let
         selectedPiece =
             getSelectedPiece model
 
+        ( points, modifiedBoard ) =
+            removeTilesAndCollectScore selectedPiece.currentPosition coord board
+
         index =
             Maybe.withDefault 4 model.indexSelected
     in
-        { model
+        ( modifiedBoard
+        , { model
             | placedPieces =
                 updatePiecesForMove index selectedPiece coord model
             , indexSelected = Nothing
-        }
+            , score = model.score + points
+          }
+        )
 
 
 isAllowedMove : Board -> PlayerModel -> AxialCoord -> Bool
