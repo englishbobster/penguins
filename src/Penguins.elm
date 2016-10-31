@@ -127,24 +127,23 @@ placePlayerTwo model coord =
         ( model, Cmd.none )
 
 
-removeTilesAndCollectScore : AxialCoord -> AxialCoord -> Board -> ( Int, Board )
-removeTilesAndCollectScore start stop board =
+removeRouteFromBoard : AxialCoord -> AxialCoord -> Board -> ( Board, Board )
+removeRouteFromBoard start stop board =
     let
         routeKeyList =
-            playerPath start stop
-
-        ( pathTiles, newBoard ) =
-            Dict.partition (\k v -> List.member k routeKeyList) board
-
-        score =
-            List.map (\tile -> tile.value) (Dict.values pathTiles)
-                |> List.foldr (+) 0
+            playerRoute start stop
     in
-        ( score, newBoard )
+        Dict.partition (\k v -> List.member k routeKeyList) board
 
 
-playerPath : AxialCoord -> AxialCoord -> List AxialCoord
-playerPath start stop =
+scoreRoute : Board -> Int
+scoreRoute route =
+    List.map (\tile -> tile.value) (Dict.values route)
+        |> List.foldr (+) 0
+
+
+playerRoute : AxialCoord -> AxialCoord -> List AxialCoord
+playerRoute start stop =
     let
         route =
             calculateRoute start stop
@@ -200,8 +199,11 @@ movePiece model coord board =
         selectedPiece =
             getSelectedPiece model
 
-        ( points, modifiedBoard ) =
-            removeTilesAndCollectScore selectedPiece.currentPosition coord board
+        ( route, modifiedBoard ) =
+            removeRouteFromBoard selectedPiece.currentPosition coord board
+
+        points =
+            scoreRoute route
 
         index =
             Maybe.withDefault 4 model.indexSelected
