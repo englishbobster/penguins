@@ -4,6 +4,7 @@ import Hexagon exposing (HexModel, PixelCoord, hexagon)
 import Player
     exposing
         ( PlayerModel
+        , Piece
         , PlayerMsg(..)
         , updatePlayer
         , placePlayer
@@ -239,9 +240,13 @@ isAllowedMove board playermodel newPos =
         True
             == isHexagon board newPos
             && not (isOccupiedHexagon board newPos)
-            --must check if path blocked by a piece, opponent or otherwise
-            &&
-                (oldx == newx || oldy == newy || oldz == newz)
+            && (oldx == newx || oldy == newy || oldz == newz)
+
+
+isRouteClearOfPlayers : Board -> Bool
+isRouteClearOfPlayers route =
+    Dict.values route
+        |> List.all (\tile -> tile.occupied == False)
 
 
 isHexagon : Board -> AxialCoord -> Bool
