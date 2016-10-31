@@ -71,12 +71,15 @@ updatePiecesForSelection index piece model =
             |> Array.set index pieceToSet
 
 
-updatePiecesForMove : Int -> Piece -> AxialCoord -> PlayerModel -> Array Piece
-updatePiecesForMove index piece coord model =
+updatePiecesForMove : Int -> AxialCoord -> PlayerModel -> Array Piece
+updatePiecesForMove index coord model =
     let
+        selectedPiece =
+            getSelectedPiece model
+
         pieceToSet =
-            { piece
-                | lastPosition = Just piece.currentPosition
+            { selectedPiece
+                | lastPosition = Just selectedPiece.currentPosition
                 , currentPosition = coord
                 , setImage = model.unselectedImage
             }

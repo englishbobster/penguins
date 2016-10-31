@@ -128,11 +128,14 @@ placePlayerTwo model coord =
         ( model, Cmd.none )
 
 
-removeRouteFromBoard : AxialCoord -> AxialCoord -> Board -> ( Board, Board )
-removeRouteFromBoard start stop board =
+removeRouteFromBoard : PlayerModel -> AxialCoord -> Board -> ( Board, Board )
+removeRouteFromBoard model finalPosition board =
     let
+        selectedPiece =
+            getSelectedPiece model
+
         routeKeyList =
-            playerRoute start stop
+            playerRoute selectedPiece.currentPosition finalPosition
     in
         Dict.partition (\k v -> List.member k routeKeyList) board
 
@@ -197,11 +200,8 @@ movePlayerTwo model coord =
 movePiece : PlayerModel -> AxialCoord -> Board -> ( Board, PlayerModel )
 movePiece model coord board =
     let
-        selectedPiece =
-            getSelectedPiece model
-
         ( route, modifiedBoard ) =
-            removeRouteFromBoard selectedPiece.currentPosition coord board
+            removeRouteFromBoard model coord board
 
         points =
             scoreRoute route
@@ -212,7 +212,7 @@ movePiece model coord board =
         ( modifiedBoard
         , { model
             | placedPieces =
-                updatePiecesForMove index selectedPiece coord model
+                updatePiecesForMove index coord model
             , indexSelected = Nothing
             , score = model.score + points
           }
