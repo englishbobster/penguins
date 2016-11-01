@@ -20,15 +20,13 @@ import Array exposing (Array, push, toList, length, get, toIndexedList)
 
 
 type alias Piece =
-    { lastPosition : Maybe AxialCoord
-    , currentPosition : AxialCoord
+    { currentPosition : AxialCoord
     , setImage : String
     }
 
 
 dummyPiece =
-    { lastPosition = Nothing
-    , currentPosition = ( 100, 100 )
+    { currentPosition = ( 100, 100 )
     , setImage = ""
     }
 
@@ -79,8 +77,7 @@ updatePiecesForMove index coord model =
 
         pieceToSet =
             { selectedPiece
-                | lastPosition = Just selectedPiece.currentPosition
-                , currentPosition = coord
+                | currentPosition = coord
                 , setImage = model.unselectedImage
             }
     in
@@ -121,8 +118,7 @@ placePlayer : AxialCoord -> PlayerModel -> PlayerModel
 placePlayer coords model =
     let
         newPiece =
-            { lastPosition = Nothing
-            , currentPosition = coords
+            { currentPosition = coords
             , setImage = model.unselectedImage
             }
     in

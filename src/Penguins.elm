@@ -101,7 +101,7 @@ placePlayerOne model coord =
         ( { model
             | playerOne =
                 placePlayer coord model.playerOne
-            , board = occupyHexagon model.board coord
+            , board = occupyHexagon coord model.board
             , gameState = updateGameState model
           }
         , Cmd.none
@@ -119,7 +119,7 @@ placePlayerTwo model coord =
         ( { model
             | playerTwo =
                 placePlayer coord model.playerTwo
-            , board = occupyHexagon model.board coord
+            , board = occupyHexagon coord model.board
             , gameState = updateGameState model
           }
         , Cmd.none
@@ -170,20 +170,15 @@ movePlayerOne model coord =
         (isAllowedMove model.board model.playerOne coord)
             && (isPieceSelected model.playerOne)
     then
-        let
-            boardUpdate =
+        ( { model
+            | playerOne = movePiece model.playerOne coord model.board
+            , board =
                 removeRouteFromBoard model.playerOne coord model.board
-
-            playerUpdate =
-                movePiece model.playerOne coord model.board
-        in
-            ( { model
-                | playerOne = playerUpdate
-                , board = occupyHexagon boardUpdate coord
-                , gameState = updateGameState model
-              }
-            , Cmd.none
-            )
+                    |> occupyHexagon coord
+            , gameState = updateGameState model
+          }
+        , Cmd.none
+        )
     else
         ( model, Cmd.none )
 
@@ -194,20 +189,15 @@ movePlayerTwo model coord =
         (isAllowedMove model.board model.playerTwo coord)
             && (isPieceSelected model.playerTwo)
     then
-        let
-            boardUpdate =
+        ( { model
+            | playerTwo = movePiece model.playerTwo coord model.board
+            , board =
                 removeRouteFromBoard model.playerTwo coord model.board
-
-            playerUpdate =
-                movePiece model.playerTwo coord model.board
-        in
-            ( { model
-                | playerTwo = playerUpdate
-                , board = occupyHexagon boardUpdate coord
-                , gameState = updateGameState model
-              }
-            , Cmd.none
-            )
+                    |> occupyHexagon coord
+            , gameState = updateGameState model
+          }
+        , Cmd.none
+        )
     else
         ( model, Cmd.none )
 
@@ -285,8 +275,8 @@ isOccupiedHexagon board coord =
                 hexagon.occupied
 
 
-occupyHexagon : Board -> AxialCoord -> Board
-occupyHexagon board coord =
+occupyHexagon : AxialCoord -> Board -> Board
+occupyHexagon coord board =
     let
         occupied : Maybe HexModel -> Maybe HexModel
         occupied maybeHex =
