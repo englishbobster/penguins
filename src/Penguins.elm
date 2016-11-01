@@ -171,6 +171,7 @@ movePlayerOne model coord =
         if
             (isAllowedMove model.board model.playerOne route coord)
                 && (isPieceSelected model.playerOne)
+                && (isRouteComplete route routeKeyList)
         then
             ( { model
                 | playerOne = movePiece model.playerOne coord route
@@ -197,6 +198,7 @@ movePlayerTwo model coord =
         if
             (isAllowedMove model.board model.playerTwo route coord)
                 && (isPieceSelected model.playerTwo)
+                && (isRouteComplete route routeKeyList)
         then
             ( { model
                 | playerTwo = movePiece model.playerTwo coord route
@@ -251,6 +253,14 @@ isAllowedMove board playermodel route newPos =
             && not (isOccupiedHexagon board newPos)
             && (oldx == newx || oldy == newy || oldz == newz)
             && not (isRouteOccupied route selectedPiece.currentPosition)
+
+
+isRouteComplete : Board -> List AxialCoord -> Bool
+isRouteComplete route routeKeyList =
+    if (Dict.size route == List.length routeKeyList) then
+        True
+    else
+        False
 
 
 isRouteOccupied : Board -> AxialCoord -> Bool
