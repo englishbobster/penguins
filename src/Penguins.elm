@@ -166,48 +166,53 @@ playerRoute model finalPosition =
 
 movePlayerOne : Model -> AxialCoord -> ( Model, Cmd Msg )
 movePlayerOne model coord =
-    if
-        (isAllowedMove model.board model.playerOne coord)
-            && (isPieceSelected model.playerOne)
-    then
-        ( { model
-            | playerOne = movePiece model.playerOne coord model.board
-            , board =
-                removeRouteFromBoard model.playerOne coord model.board
-                    |> occupyHexagon coord
-            , gameState = updateGameState model
-          }
-        , Cmd.none
-        )
-    else
-        ( model, Cmd.none )
+    let
+        route =
+            makeRouteFromBoard model.playerOne coord model.board
+    in
+        if
+            (isAllowedMove model.board model.playerOne route coord)
+                && (isPieceSelected model.playerOne)
+        then
+            ( { model
+                | playerOne = movePiece model.playerOne coord route
+                , board =
+                    removeRouteFromBoard model.playerOne coord model.board
+                        |> occupyHexagon coord
+                , gameState = updateGameState model
+              }
+            , Cmd.none
+            )
+        else
+            ( model, Cmd.none )
 
 
 movePlayerTwo : Model -> AxialCoord -> ( Model, Cmd Msg )
 movePlayerTwo model coord =
-    if
-        (isAllowedMove model.board model.playerTwo coord)
-            && (isPieceSelected model.playerTwo)
-    then
-        ( { model
-            | playerTwo = movePiece model.playerTwo coord model.board
-            , board =
-                removeRouteFromBoard model.playerTwo coord model.board
-                    |> occupyHexagon coord
-            , gameState = updateGameState model
-          }
-        , Cmd.none
-        )
-    else
-        ( model, Cmd.none )
+    let
+        route =
+            makeRouteFromBoard model.playerTwo coord model.board
+    in
+        if
+            (isAllowedMove model.board model.playerTwo route coord)
+                && (isPieceSelected model.playerTwo)
+        then
+            ( { model
+                | playerTwo = movePiece model.playerTwo coord route
+                , board =
+                    removeRouteFromBoard model.playerTwo coord model.board
+                        |> occupyHexagon coord
+                , gameState = updateGameState model
+              }
+            , Cmd.none
+            )
+        else
+            ( model, Cmd.none )
 
 
 movePiece : PlayerModel -> AxialCoord -> Board -> PlayerModel
-movePiece model coord board =
+movePiece model coord route =
     let
-        route =
-            makeRouteFromBoard model coord board
-
         points =
             scoreRoute route
 
@@ -222,8 +227,8 @@ movePiece model coord board =
         }
 
 
-isAllowedMove : Board -> PlayerModel -> AxialCoord -> Bool
-isAllowedMove board playermodel newPos =
+isAllowedMove : Board -> PlayerModel -> Board -> AxialCoord -> Bool
+isAllowedMove board playermodel route newPos =
     let
         selectedPiece =
             getSelectedPiece playermodel
@@ -244,12 +249,14 @@ isAllowedMove board playermodel newPos =
             == isHexagon board newPos
             && not (isOccupiedHexagon board newPos)
             && (oldx == newx || oldy == newy || oldz == newz)
+            && not (isRouteOccupied route selectedPiece.currentPosition)
 
 
-isRouteClearOfPlayers : Board -> Bool
-isRouteClearOfPlayers route =
-    Dict.values route
-        |> List.all (\tile -> tile.occupied == False)
+isRouteOccupied : Board -> AxialCoord -> Bool
+isRouteOccupied route startCoord =
+    Dict.remove startCoord route
+        |> Dict.values
+        |> List.any (\tile -> tile.occupied == True)
 
 
 isHexagon : Board -> AxialCoord -> Bool
