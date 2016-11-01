@@ -171,7 +171,10 @@ movePlayerOne model coord =
             && (isPieceSelected model.playerOne)
     then
         let
-            ( boardUpdate, playerUpdate ) =
+            boardUpdate =
+                removeRouteFromBoard model.playerOne coord model.board
+
+            playerUpdate =
                 movePiece model.playerOne coord model.board
         in
             ( { model
@@ -192,7 +195,10 @@ movePlayerTwo model coord =
             && (isPieceSelected model.playerTwo)
     then
         let
-            ( boardUpdate, playerUpdate ) =
+            boardUpdate =
+                removeRouteFromBoard model.playerTwo coord model.board
+
+            playerUpdate =
                 movePiece model.playerTwo coord model.board
         in
             ( { model
@@ -206,12 +212,9 @@ movePlayerTwo model coord =
         ( model, Cmd.none )
 
 
-movePiece : PlayerModel -> AxialCoord -> Board -> ( Board, PlayerModel )
+movePiece : PlayerModel -> AxialCoord -> Board -> PlayerModel
 movePiece model coord board =
     let
-        modifiedBoard =
-            removeRouteFromBoard model coord board
-
         route =
             makeRouteFromBoard model coord board
 
@@ -221,14 +224,12 @@ movePiece model coord board =
         index =
             Maybe.withDefault 4 model.indexSelected
     in
-        ( modifiedBoard
-        , { model
+        { model
             | placedPieces =
                 updatePiecesForMove index coord model
             , indexSelected = Nothing
             , score = model.score + points
-          }
-        )
+        }
 
 
 isAllowedMove : Board -> PlayerModel -> AxialCoord -> Bool
