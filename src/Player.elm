@@ -1,7 +1,6 @@
 module Player
     exposing
         ( PlayerModel
-        , Piece
         , PlayerMsg(..)
         , updatePlayer
         , placePlayer

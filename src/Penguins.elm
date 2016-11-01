@@ -4,7 +4,6 @@ import Hexagon exposing (HexModel, PixelCoord, hexagon)
 import Player
     exposing
         ( PlayerModel
-        , Piece
         , PlayerMsg(..)
         , updatePlayer
         , placePlayer
@@ -137,13 +136,9 @@ removeRouteFromBoard model finalPosition board =
         Dict.filter (\k v -> not (List.member k routeKeyList)) board
 
 
-makeRouteFromBoard : PlayerModel -> AxialCoord -> Board -> Board
-makeRouteFromBoard model finalPosition board =
-    let
-        routeKeyList =
-            playerRoute model finalPosition
-    in
-        Dict.filter (\k v -> List.member k routeKeyList) board
+makeRouteFromBoard : List AxialCoord -> Board -> Board
+makeRouteFromBoard keyList board =
+    Dict.filter (\k v -> List.member k keyList) board
 
 
 scoreRoute : Board -> Int
@@ -167,8 +162,11 @@ playerRoute model finalPosition =
 movePlayerOne : Model -> AxialCoord -> ( Model, Cmd Msg )
 movePlayerOne model coord =
     let
+        routeKeyList =
+            playerRoute model.playerOne coord
+
         route =
-            makeRouteFromBoard model.playerOne coord model.board
+            makeRouteFromBoard routeKeyList model.board
     in
         if
             (isAllowedMove model.board model.playerOne route coord)
@@ -190,8 +188,11 @@ movePlayerOne model coord =
 movePlayerTwo : Model -> AxialCoord -> ( Model, Cmd Msg )
 movePlayerTwo model coord =
     let
+        routeKeyList =
+            playerRoute model.playerTwo coord
+
         route =
-            makeRouteFromBoard model.playerTwo coord model.board
+            makeRouteFromBoard routeKeyList model.board
     in
         if
             (isAllowedMove model.board model.playerTwo route coord)
