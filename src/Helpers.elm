@@ -5,6 +5,7 @@ module Helpers
         , axialCoordsToPixel
         , pixelToAxialCoords
         , calculateRoute
+        , nearestNeighbours
         )
 
 import Hexagon exposing (PixelCoord)
@@ -67,6 +68,15 @@ pixelToAxialCoords size ( x, y ) =
             ((-ox / 3) + (((sqrt 3) / 3) * oy)) / (toFloat size)
     in
         ( q, r ) |> roundAxialHex
+
+
+nearestNeighbours : AxialCoord -> List AxialCoord
+nearestNeighbours ( centerx, centery ) =
+    let
+        directionList =
+            [ ( 1, -1 ), ( 1, 0 ), ( 0, 1 ), ( -1, 1 ), ( -1, 0 ), ( 0, -1 ) ]
+    in
+        List.map (\( x, y ) -> ( (centerx + x), (centery + y) )) directionList
 
 
 calculateDistanceBetweenCenters : AxialCoord -> AxialCoord -> Int

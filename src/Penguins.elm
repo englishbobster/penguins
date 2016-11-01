@@ -82,6 +82,9 @@ update msg model =
                     PlayerTwoMove ->
                         movePlayerTwo model posAsAxial
 
+                    GameOver ->
+                        ( model, Cmd.none )
+
         PlayerMessage msg ->
             if (model.gameState == PlayerOneMove) then
                 ( { model | playerOne = updatePlayer msg model.playerOne }, Cmd.none )
@@ -385,9 +388,6 @@ view model =
                 ++ (viewPlayerOnePieces model)
                 ++ (viewPlayerTwoPieces model)
             )
-        , div [] [ text (toString model.gameState) ]
-        , div [] [ text (toString model.playerOne) ]
-        , div [] [ text (toString model.playerTwo) ]
         ]
 
 

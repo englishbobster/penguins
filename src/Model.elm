@@ -24,6 +24,7 @@ type GameState
     | PlayerTwoPlacePiece
     | PlayerOneMove
     | PlayerTwoMove
+    | GameOver
 
 
 type alias Board =

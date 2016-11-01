@@ -39,4 +39,12 @@ all =
             \() ->
                 Expect.equal (Helpers.calculateRoute ( 4, 1 ) ( 8, 1 ))
                     [ ( 4, 1 ), ( 5, 1 ), ( 6, 1 ), ( 7, 1 ), ( 8, 1 ) ]
+        , test "get neighbour list for (0,0) should return 6 nearest neighbours" <|
+            \() ->
+                Expect.equal (Helpers.nearestNeighbours ( 0, 0 ))
+                    [ ( 1, -1 ), ( 1, 0 ), ( 0, 1 ), ( -1, 1 ), ( -1, 0 ), ( 0, -1 ) ]
+        , test "get neighbour list for (2,3) should return 6 nearest neighbours" <|
+            \() ->
+                Expect.equal (Helpers.nearestNeighbours ( 2, 3 ))
+                    [ ( 3, 2 ), ( 3, 3 ), ( 2, 4 ), ( 1, 4 ), ( 1, 3 ), ( 2, 2 ) ]
         ]
