@@ -33,7 +33,7 @@ import Helpers
         )
 import Constants exposing (const)
 import Dict exposing (Dict, empty, insert, filter)
-import Html exposing (Html, div, text)
+import Html exposing (Html, div, text, h1)
 import Html.App as App
 import Svg exposing (Svg)
 import Svg.Attributes exposing (height, width)
@@ -261,8 +261,15 @@ isAllowedMove board player route newPos =
             && not (isRouteOccupied route selectedPiece.currentPosition)
 
 
-hasNeighbourSpaces : Board -> AxialCoord -> Bool
-hasNeighbourSpaces board coord =
+hasPiecesWithMovesAvailable : PlayerModel -> Board -> Bool
+hasPiecesWithMovesAvailable player board =
+    Array.toList player.placedPieces
+        |> List.map (\piece -> piece.currentPosition)
+        |> List.any (\pos -> hasEmptyNeighbourSpaces board pos)
+
+
+hasEmptyNeighbourSpaces : Board -> AxialCoord -> Bool
+hasEmptyNeighbourSpaces board coord =
     nearestNeighbours coord
         |> List.any
             (\coord -> isHexagon board coord && not (isOccupiedHexagon board coord))
@@ -398,6 +405,9 @@ view model =
                 ++ (viewPlayerOnePieces model)
                 ++ (viewPlayerTwoPieces model)
             )
+        , div [] [ text (toString model.gameState) ]
+        , div [] [ text (toString model.playerOne) ]
+        , div [] [ text (toString model.playerTwo) ]
         ]
 
 

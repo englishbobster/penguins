@@ -50,6 +50,7 @@ initialModel =
     , playerOne =
         { placedPieces = Array.empty
         , indexSelected = Nothing
+        , movesAvailable = True
         , score = 0
         , unselectedImage = const.playerOneUnselectedImage
         , selectedImage = const.playerOneSelectedImage
@@ -58,6 +59,7 @@ initialModel =
         { placedPieces = Array.empty
         , indexSelected = Nothing
         , score = 0
+        , movesAvailable = True
         , unselectedImage = const.playerTwoUnselectedImage
         , selectedImage = const.playerTwoSelectedImage
         }
