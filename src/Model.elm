@@ -2,6 +2,7 @@ module Model
     exposing
         ( Model
         , Board
+        , Route
         , GameState(..)
         , updateGameState
         , initialModel
@@ -28,6 +29,10 @@ type GameState
 
 
 type alias Board =
+    Dict AxialCoord HexModel
+
+
+type alias Route =
     Dict AxialCoord HexModel
 
 

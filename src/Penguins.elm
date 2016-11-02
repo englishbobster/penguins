@@ -16,6 +16,7 @@ import Model
     exposing
         ( Model
         , Board
+        , Route
         , GameState(..)
         , updateGameState
         , initialModel
@@ -28,6 +29,7 @@ import Helpers
         , axialCoordsToPixel
         , pixelToAxialCoords
         , calculateRoute
+        , nearestNeighbours
         )
 import Constants exposing (const)
 import Dict exposing (Dict, empty, insert, filter)
@@ -40,6 +42,7 @@ import Time exposing (Time, inSeconds, now)
 import Task exposing (perform)
 import Random exposing (int, step, initialSeed)
 import Mouse exposing (Position, clicks)
+import Array
 
 
 --update
@@ -131,10 +134,10 @@ placePlayerTwo model coord =
 
 
 removeRouteFromBoard : PlayerModel -> AxialCoord -> Board -> Board
-removeRouteFromBoard model finalPosition board =
+removeRouteFromBoard player finalPosition board =
     let
         routeKeyList =
-            playerRoute model finalPosition
+            playerRoute player finalPosition
     in
         Dict.filter (\k v -> not (List.member k routeKeyList)) board
 
@@ -144,17 +147,17 @@ makeRouteFromBoard keyList board =
     Dict.filter (\k v -> List.member k keyList) board
 
 
-scoreRoute : Board -> Int
+scoreRoute : Route -> Int
 scoreRoute route =
     List.map (\tile -> tile.value) (Dict.values route)
         |> List.foldr (+) 0
 
 
 playerRoute : PlayerModel -> AxialCoord -> List AxialCoord
-playerRoute model finalPosition =
+playerRoute player finalPosition =
     let
         selectedPiece =
-            getSelectedPiece model
+            getSelectedPiece player
 
         route =
             calculateRoute selectedPiece.currentPosition finalPosition
@@ -216,28 +219,28 @@ movePlayerTwo model coord =
             ( model, Cmd.none )
 
 
-movePiece : PlayerModel -> AxialCoord -> Board -> PlayerModel
-movePiece model coord route =
+movePiece : PlayerModel -> AxialCoord -> Route -> PlayerModel
+movePiece player coord route =
     let
         points =
             scoreRoute route
 
         index =
-            Maybe.withDefault 4 model.indexSelected
+            Maybe.withDefault 4 player.indexSelected
     in
-        { model
+        { player
             | placedPieces =
-                updatePiecesForMove index coord model
+                updatePiecesForMove index coord player
             , indexSelected = Nothing
-            , score = model.score + points
+            , score = player.score + points
         }
 
 
-isAllowedMove : Board -> PlayerModel -> Board -> AxialCoord -> Bool
-isAllowedMove board playermodel route newPos =
+isAllowedMove : Board -> PlayerModel -> Route -> AxialCoord -> Bool
+isAllowedMove board player route newPos =
     let
         selectedPiece =
-            getSelectedPiece playermodel
+            getSelectedPiece player
 
         ( oldx, oldy ) =
             selectedPiece.currentPosition
@@ -258,7 +261,14 @@ isAllowedMove board playermodel route newPos =
             && not (isRouteOccupied route selectedPiece.currentPosition)
 
 
-isRouteComplete : Board -> List AxialCoord -> Bool
+hasNeighbourSpaces : Board -> AxialCoord -> Bool
+hasNeighbourSpaces board coord =
+    nearestNeighbours coord
+        |> List.any
+            (\coord -> isHexagon board coord && not (isOccupiedHexagon board coord))
+
+
+isRouteComplete : Route -> List AxialCoord -> Bool
 isRouteComplete route routeKeyList =
     if (Dict.size route == List.length routeKeyList) then
         True
@@ -266,7 +276,7 @@ isRouteComplete route routeKeyList =
         False
 
 
-isRouteOccupied : Board -> AxialCoord -> Bool
+isRouteOccupied : Route -> AxialCoord -> Bool
 isRouteOccupied route startCoord =
     Dict.remove startCoord route
         |> Dict.values

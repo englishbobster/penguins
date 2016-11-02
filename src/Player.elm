@@ -20,12 +20,14 @@ import Array exposing (Array, push, toList, length, get, toIndexedList)
 
 type alias Piece =
     { currentPosition : AxialCoord
+    , movesAvailable : Bool
     , setImage : String
     }
 
 
 dummyPiece =
     { currentPosition = ( 100, 100 )
+    , movesAvailable = True
     , setImage = ""
     }
 
@@ -118,6 +120,7 @@ placePlayer coords model =
     let
         newPiece =
             { currentPosition = coords
+            , movesAvailable = True
             , setImage = model.unselectedImage
             }
     in
