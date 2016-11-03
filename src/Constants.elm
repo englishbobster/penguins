@@ -17,7 +17,7 @@ type alias Constants =
 
 const : Constants
 const =
-    { boardSize = ( 10, 10 )
+    { boardSize = ( 3, 3 )
     , playerSvgOffset = 25
     , hexSize = 55
     , hexColour = "purple"
@@ -26,5 +26,5 @@ const =
     , playerTwoUnselectedImage = "../graphics/pengmaru.svg"
     , playerOneSelectedImage = "../graphics/batzmaru_selected.svg"
     , playerTwoSelectedImage = "../graphics/pengmaru_selected.svg"
-    , piecesPerPlayer = 3
+    , piecesPerPlayer = 1
     }

@@ -1,13 +1,13 @@
 module Player
     exposing
         ( PlayerModel
+        , Piece
         , PlayerMsg(..)
         , updatePlayer
         , placePlayer
         , drawPlayerPieces
         , isPieceSelected
         , getSelectedPiece
-        , updatePiecesForMove
         )
 
 import Helpers exposing (AxialCoord, axialCoordsToPixel)
@@ -21,12 +21,14 @@ import Array exposing (Array, push, toList, length, get, toIndexedList)
 type alias Piece =
     { currentPosition : AxialCoord
     , setImage : String
+    , movesAvailable : Bool
     }
 
 
 dummyPiece =
     { currentPosition = ( 100, 100 )
     , setImage = ""
+    , movesAvailable = False
     }
 
 
@@ -34,7 +36,6 @@ type alias PlayerModel =
     { placedPieces : Array Piece
     , indexSelected : Maybe Int
     , score : Int
-    , movesAvailable : Bool
     , unselectedImage : String
     , selectedImage : String
     }
@@ -66,22 +67,6 @@ updatePiecesForSelection index piece model =
     in
         model.placedPieces
             |> Array.map (\piece -> { piece | setImage = model.unselectedImage })
-            |> Array.set index pieceToSet
-
-
-updatePiecesForMove : Int -> AxialCoord -> PlayerModel -> Array Piece
-updatePiecesForMove index coord model =
-    let
-        selectedPiece =
-            getSelectedPiece model
-
-        pieceToSet =
-            { selectedPiece
-                | currentPosition = coord
-                , setImage = model.unselectedImage
-            }
-    in
-        model.placedPieces
             |> Array.set index pieceToSet
 
 
@@ -120,6 +105,7 @@ placePlayer coords model =
         newPiece =
             { currentPosition = coords
             , setImage = model.unselectedImage
+            , movesAvailable = True
             }
     in
         if not (allPiecesPlaced model) then

@@ -4,13 +4,13 @@ import Hexagon exposing (HexModel, PixelCoord, hexagon)
 import Player
     exposing
         ( PlayerModel
+        , Piece
         , PlayerMsg(..)
         , updatePlayer
         , placePlayer
         , drawPlayerPieces
         , getSelectedPiece
         , isPieceSelected
-        , updatePiecesForMove
         )
 import Model
     exposing
@@ -42,7 +42,7 @@ import Time exposing (Time, inSeconds, now)
 import Task exposing (perform)
 import Random exposing (int, step, initialSeed)
 import Mouse exposing (Position, clicks)
-import Array
+import Array exposing (Array)
 
 
 --update
@@ -180,7 +180,7 @@ movePlayerOne model coord =
                 && (isRouteComplete route routeKeyList)
         then
             ( { model
-                | playerOne = movePiece model.playerOne coord route
+                | playerOne = movePiece model.playerOne model.board coord route
                 , board =
                     removeRouteFromBoard model.playerOne coord model.board
                         |> occupyHexagon coord
@@ -207,7 +207,7 @@ movePlayerTwo model coord =
                 && (isRouteComplete route routeKeyList)
         then
             ( { model
-                | playerTwo = movePiece model.playerTwo coord route
+                | playerTwo = movePiece model.playerTwo model.board coord route
                 , board =
                     removeRouteFromBoard model.playerTwo coord model.board
                         |> occupyHexagon coord
@@ -219,8 +219,25 @@ movePlayerTwo model coord =
             ( model, Cmd.none )
 
 
-movePiece : PlayerModel -> AxialCoord -> Route -> PlayerModel
-movePiece player coord route =
+updatePiecesForMove : Int -> Board -> AxialCoord -> PlayerModel -> Array Piece
+updatePiecesForMove index board coord model =
+    let
+        selectedPiece =
+            getSelectedPiece model
+
+        pieceToSet =
+            { selectedPiece
+                | currentPosition = coord
+                , setImage = model.unselectedImage
+                , movesAvailable = hasEmptyNeighbourSpaces board coord
+            }
+    in
+        model.placedPieces
+            |> Array.set index pieceToSet
+
+
+movePiece : PlayerModel -> Board -> AxialCoord -> Route -> PlayerModel
+movePiece player board coord route =
     let
         points =
             scoreRoute route
@@ -230,7 +247,7 @@ movePiece player coord route =
     in
         { player
             | placedPieces =
-                updatePiecesForMove index coord player
+                updatePiecesForMove index board coord player
             , indexSelected = Nothing
             , score = player.score + points
         }
