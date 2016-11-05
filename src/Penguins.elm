@@ -1,6 +1,22 @@
 module Penguins exposing (..)
 
-import Hexagon exposing (HexModel, PixelCoord, hexagon)
+import Hexagon
+    exposing
+        ( HexModel
+        , PixelCoord
+        , hexagon
+        , emptyHexagon
+        )
+import Board
+    exposing
+        ( Board
+        , Route
+        , generateBoard
+        , generateMapKeys
+        , findRouteOnBoard
+        , deleteRouteFromBoard
+        , scoreRoute
+        )
 import Player
     exposing
         ( PlayerModel
@@ -15,12 +31,9 @@ import Player
 import Model
     exposing
         ( Model
-        , Board
-        , Route
         , GameState(..)
         , updateGameState
         , initialModel
-        , emptyHexagon
         )
 import Helpers
     exposing
@@ -38,11 +51,10 @@ import Html.App as App
 import Svg exposing (Svg)
 import Svg.Attributes exposing (height, width)
 import String exposing (join)
-import Time exposing (Time, inSeconds, now)
 import Task exposing (perform)
-import Random exposing (int, step, initialSeed)
 import Mouse exposing (Position, clicks)
 import Array exposing (Array)
+import Time exposing (Time, now)
 
 
 --update
@@ -53,6 +65,11 @@ type Msg
     | GenerateBoard Time
     | MousePos Position
     | PlayerMessage PlayerMsg
+
+
+currentTime : Cmd Msg
+currentTime =
+    perform (\_ -> NoOp) GenerateBoard now
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -80,10 +97,18 @@ update msg model =
                         placePlayerTwo model posAsAxial
 
                     PlayerOneMove ->
-                        movePlayerOne model posAsAxial
+                        ( (movePlayerOne model posAsAxial
+                            |> updatePlayerTwo
+                          )
+                        , Cmd.none
+                        )
 
                     PlayerTwoMove ->
-                        movePlayerTwo model posAsAxial
+                        ( (movePlayerTwo model posAsAxial
+                            |> updatePlayerOne
+                          )
+                        , Cmd.none
+                        )
 
                     GameOver ->
                         ( model, Cmd.none )
@@ -133,24 +158,13 @@ placePlayerTwo model coord =
         ( model, Cmd.none )
 
 
-removeRouteFromBoard : PlayerModel -> AxialCoord -> Board -> Board
-removeRouteFromBoard player finalPosition board =
+removePlayerRouteFromBoard : PlayerModel -> AxialCoord -> Board -> Board
+removePlayerRouteFromBoard player finalPosition board =
     let
         routeKeyList =
             playerRoute player finalPosition
     in
-        Dict.filter (\k v -> not (List.member k routeKeyList)) board
-
-
-makeRouteFromBoard : List AxialCoord -> Board -> Board
-makeRouteFromBoard keyList board =
-    Dict.filter (\k v -> List.member k keyList) board
-
-
-scoreRoute : Route -> Int
-scoreRoute route =
-    List.map (\tile -> tile.value) (Dict.values route)
-        |> List.foldr (+) 0
+        deleteRouteFromBoard board routeKeyList
 
 
 playerRoute : PlayerModel -> AxialCoord -> List AxialCoord
@@ -165,62 +179,68 @@ playerRoute player finalPosition =
         route |> List.take (List.length route - 1)
 
 
-movePlayerOne : Model -> AxialCoord -> ( Model, Cmd Msg )
+updatePlayerOne : Model -> Model
+updatePlayerOne model =
+    { model | playerOne = updateAllowedMovesForOtherPlayer model.playerOne model.board }
+
+
+movePlayerOne : Model -> AxialCoord -> Model
 movePlayerOne model coord =
     let
         routeKeyList =
             playerRoute model.playerOne coord
 
         route =
-            makeRouteFromBoard routeKeyList model.board
+            findRouteOnBoard model.board routeKeyList
     in
         if
             (isAllowedMove model.board model.playerOne route coord)
                 && (isPieceSelected model.playerOne)
                 && (isRouteComplete route routeKeyList)
         then
-            ( { model
+            { model
                 | playerOne = movePiece model.playerOne model.board coord route
                 , board =
-                    removeRouteFromBoard model.playerOne coord model.board
+                    removePlayerRouteFromBoard model.playerOne coord model.board
                         |> occupyHexagon coord
                 , gameState = updateGameState model
-              }
-            , Cmd.none
-            )
+            }
         else
-            ( model, Cmd.none )
+            model
 
 
-movePlayerTwo : Model -> AxialCoord -> ( Model, Cmd Msg )
+updatePlayerTwo : Model -> Model
+updatePlayerTwo model =
+    { model | playerTwo = updateAllowedMovesForOtherPlayer model.playerTwo model.board }
+
+
+movePlayerTwo : Model -> AxialCoord -> Model
 movePlayerTwo model coord =
     let
         routeKeyList =
             playerRoute model.playerTwo coord
 
         route =
-            makeRouteFromBoard routeKeyList model.board
+            findRouteOnBoard model.board routeKeyList
     in
         if
             (isAllowedMove model.board model.playerTwo route coord)
                 && (isPieceSelected model.playerTwo)
                 && (isRouteComplete route routeKeyList)
         then
-            ( { model
+            { model
                 | playerTwo = movePiece model.playerTwo model.board coord route
                 , board =
-                    removeRouteFromBoard model.playerTwo coord model.board
+                    removePlayerRouteFromBoard model.playerTwo coord model.board
                         |> occupyHexagon coord
                 , gameState = updateGameState model
-              }
-            , Cmd.none
-            )
+            }
         else
-            ( model, Cmd.none )
+            model
 
 
-updatePiecesForMove : Int -> Board -> AxialCoord -> PlayerModel -> Array Piece
-updatePiecesForMove index board coord model =
+updatePieceForMove : Int -> Board -> AxialCoord -> PlayerModel -> Array Piece
+updatePieceForMove index board coord model =
     let
         selectedPiece =
             getSelectedPiece model
@@ -233,7 +253,18 @@ updatePiecesForMove index board coord model =
             }
     in
         model.placedPieces
+            |> updateAllowedMoveForAllPieces board
             |> Array.set index pieceToSet
+
+
+updateAllowedMovesForOtherPlayer : PlayerModel -> Board -> PlayerModel
+updateAllowedMovesForOtherPlayer player board =
+    { player | placedPieces = updateAllowedMoveForAllPieces board player.placedPieces }
+
+
+updateAllowedMoveForAllPieces : Board -> Array Piece -> Array Piece
+updateAllowedMoveForAllPieces board pieces =
+    Array.map (\piece -> { piece | movesAvailable = hasEmptyNeighbourSpaces board piece.currentPosition }) pieces
 
 
 movePiece : PlayerModel -> Board -> AxialCoord -> Route -> PlayerModel
@@ -247,7 +278,7 @@ movePiece player board coord route =
     in
         { player
             | placedPieces =
-                updatePiecesForMove index board coord player
+                updatePieceForMove index board coord player
             , indexSelected = Nothing
             , score = player.score + points
         }
@@ -345,70 +376,6 @@ occupyHexagon coord board =
         Dict.update coord occupied board
 
 
-generateBoard : Time -> ( Int, Int ) -> Board
-generateBoard timeAsSeed ( rows, columns ) =
-    let
-        fishList =
-            randomizeFish (timeInSeconds timeAsSeed) (rows * columns)
-
-        mapkeys =
-            generateMapKeys rows columns
-    in
-        List.map2
-            (\k v ->
-                ( k
-                , { emptyHexagon
-                    | value = v
-                    , center = (axialCoordsToPixel const.hexSize k)
-                  }
-                )
-            )
-            mapkeys
-            fishList
-            |> Dict.fromList
-
-
-timeInSeconds : Time -> Int
-timeInSeconds time =
-    round (inSeconds time)
-
-
-currentTime : Cmd Msg
-currentTime =
-    perform (\_ -> NoOp) GenerateBoard now
-
-
-randomizeFish : Int -> Int -> List Int
-randomizeFish seed listSize =
-    let
-        ( nrFish, newSeed ) =
-            Random.step (Random.list listSize (Random.int 1 5)) (initialSeed seed)
-    in
-        nrFish
-
-
-generateMapKeys : Int -> Int -> List AxialCoord
-generateMapKeys maxColumns maxRows =
-    List.map convertFromEvenQToAxial (generateAllMapKeys maxColumns 0 maxRows [])
-
-
-generateAllMapKeys : Int -> Int -> Int -> List AxialCoord -> List AxialCoord
-generateAllMapKeys maxColumns currentColumn maxRows list =
-    if currentColumn == maxColumns then
-        list
-    else
-        let
-            newList =
-                list ++ (generateMapKeyListForRow currentColumn maxRows)
-        in
-            generateAllMapKeys maxColumns (currentColumn + 1) maxRows newList
-
-
-generateMapKeyListForRow : Int -> Int -> List AxialCoord
-generateMapKeyListForRow colNr maxRows =
-    List.map (\n -> ( colNr, n )) [0..(maxRows - 1)]
-
-
 
 -- View
 
@@ -418,9 +385,9 @@ view model =
     div []
         [ Svg.svg
             [ height "1100", width "100%" ]
-            ((drawBoard model.board)
-                ++ (viewPlayerOnePieces model)
-                ++ (viewPlayerTwoPieces model)
+            ((viewBoard model.board)
+                ++ (viewPlayerPieces model.playerOne)
+                ++ (viewPlayerPieces model.playerTwo)
             )
         , div [] [ text (toString model.gameState) ]
         , div [] [ text (toString model.playerOne) ]
@@ -428,26 +395,17 @@ view model =
         ]
 
 
-viewPlayerOnePieces : Model -> List (Svg Msg)
-viewPlayerOnePieces model =
+viewPlayerPieces : PlayerModel -> List (Svg Msg)
+viewPlayerPieces player =
     List.map
         (\svgmsg ->
             App.map PlayerMessage (svgmsg)
         )
-        (drawPlayerPieces model.playerOne)
+        (drawPlayerPieces player)
 
 
-viewPlayerTwoPieces : Model -> List (Svg Msg)
-viewPlayerTwoPieces model =
-    List.map
-        (\svgmsg ->
-            App.map PlayerMessage (svgmsg)
-        )
-        (drawPlayerPieces model.playerTwo)
-
-
-drawBoard : Board -> List (Svg Msg)
-drawBoard board =
+viewBoard : Board -> List (Svg Msg)
+viewBoard board =
     let
         getHexagon : AxialCoord -> HexModel
         getHexagon tileCoord =

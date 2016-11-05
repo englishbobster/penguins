@@ -1,17 +1,15 @@
 module Model
     exposing
         ( Model
-        , Board
-        , Route
         , GameState(..)
         , updateGameState
         , initialModel
-        , emptyHexagon
         )
 
 import Dict exposing (Dict)
 import Array exposing (empty)
 import Hexagon exposing (HexModel)
+import Board exposing (Board)
 import Player exposing (PlayerModel)
 import Helpers exposing (AxialCoord)
 import Constants exposing (const)
@@ -26,14 +24,6 @@ type GameState
     | PlayerOneMove
     | PlayerTwoMove
     | GameOver
-
-
-type alias Board =
-    Dict AxialCoord HexModel
-
-
-type alias Route =
-    Dict AxialCoord HexModel
 
 
 type alias Model =
@@ -62,18 +52,6 @@ initialModel =
         , selectedImage = const.playerTwoSelectedImage
         }
     , gameState = PlayerOnePlacePiece
-    }
-
-
-emptyHexagon : HexModel
-emptyHexagon =
-    { value = 0
-    , border = "black"
-    , colour = const.hexColour
-    , size = const.hexSize
-    , center = ( 0, 0 )
-    , shrinkFactor = const.hexShrinkFactor
-    , occupied = False
     }
 
 

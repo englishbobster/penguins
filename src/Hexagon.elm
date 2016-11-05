@@ -3,11 +3,13 @@ module Hexagon
         ( HexModel
         , PixelCoord
         , hexagon
+        , emptyHexagon
         )
 
 import String exposing (join)
 import Svg exposing (Svg, svg, text', text, polygon)
 import Svg.Attributes exposing (style, points, x, y, fontSize, dy)
+import Constants exposing (const)
 
 
 type alias PixelCoord =
@@ -22,6 +24,18 @@ type alias HexModel =
     , center : PixelCoord
     , occupied : Bool
     , shrinkFactor : Int
+    }
+
+
+emptyHexagon : HexModel
+emptyHexagon =
+    { value = 0
+    , border = "black"
+    , colour = const.hexColour
+    , size = const.hexSize
+    , center = ( 0, 0 )
+    , shrinkFactor = const.hexShrinkFactor
+    , occupied = False
     }
 
 
