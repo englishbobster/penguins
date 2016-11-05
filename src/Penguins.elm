@@ -369,17 +369,33 @@ occupyHexagon coord board =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ Svg.svg
-            [ height "1100", width "100%" ]
-            ((viewBoard model.board)
-                ++ (viewPlayerPieces model.playerOne)
-                ++ (viewPlayerPieces model.playerTwo)
-            )
-        , div [] [ text (toString model.gameState) ]
-        , div [] [ text (toString model.playerOne) ]
-        , div [] [ text (toString model.playerTwo) ]
-        ]
+    let
+        ( rows, columns ) =
+            const.boardSize
+
+        calculatedHeight =
+            toString (2 * const.hexSize * rows)
+    in
+        div []
+            [ Svg.svg
+                [ height calculatedHeight, width "100%" ]
+                ((viewBoard model.board)
+                    ++ (viewPlayerPieces model.playerOne)
+                    ++ (viewPlayerPieces model.playerTwo)
+                )
+            , div []
+                [ h1 []
+                    [ text
+                        ("Score PlayerOne: "
+                            ++ (toString model.playerOne.score)
+                            ++ "          "
+                            ++ "Score PlayerTwo: "
+                            ++ (toString model.playerTwo.score)
+                        )
+                    ]
+                , h1 [] [ text (toString model.gameState) ]
+                ]
+            ]
 
 
 viewPlayerPieces : PlayerModel -> List (Svg Msg)
