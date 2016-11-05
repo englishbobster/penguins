@@ -55,6 +55,12 @@ initialModel =
     }
 
 
+hasPiecesWithMovesAvailable : PlayerModel -> Bool
+hasPiecesWithMovesAvailable player =
+    Array.toList player.placedPieces
+        |> List.any (\piece -> piece.movesAvailable == True)
+
+
 updateGameState : Model -> Model
 updateGameState model =
     if model.gameState == PlayerOnePlacePiece then
@@ -65,8 +71,18 @@ updateGameState model =
         else
             { model | gameState = PlayerOnePlacePiece }
     else if model.gameState == PlayerOneMove then
-        { model | gameState = PlayerTwoMove }
+        if (hasPiecesWithMovesAvailable model.playerTwo) then
+            { model | gameState = PlayerTwoMove }
+        else if (hasPiecesWithMovesAvailable model.playerOne) then
+            { model | gameState = PlayerOneMove }
+        else
+            { model | gameState = GameOver }
     else if model.gameState == PlayerTwoMove then
-        { model | gameState = PlayerOneMove }
+        if (hasPiecesWithMovesAvailable model.playerOne) then
+            { model | gameState = PlayerOneMove }
+        else if (hasPiecesWithMovesAvailable model.playerTwo) then
+            { model | gameState = PlayerTwoMove }
+        else
+            { model | gameState = GameOver }
     else
         model

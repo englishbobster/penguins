@@ -303,13 +303,6 @@ isAllowedMove board player route newPos =
             && not (isRouteOccupied route selectedPiece.currentPosition)
 
 
-hasPiecesWithMovesAvailable : PlayerModel -> Board -> Bool
-hasPiecesWithMovesAvailable player board =
-    Array.toList player.placedPieces
-        |> List.map (\piece -> piece.currentPosition)
-        |> List.any (\pos -> hasEmptyNeighbourSpaces board pos)
-
-
 hasEmptyNeighbourSpaces : Board -> AxialCoord -> Bool
 hasEmptyNeighbourSpaces board coord =
     nearestNeighbours coord
