@@ -97,18 +97,10 @@ update msg model =
                         placePlayerTwo model posAsAxial
 
                     PlayerOneMove ->
-                        ( (movePlayerOne model posAsAxial
-                            |> updatePlayerTwo
-                          )
-                        , Cmd.none
-                        )
+                        ( (movePlayerOne model posAsAxial), Cmd.none )
 
                     PlayerTwoMove ->
-                        ( (movePlayerTwo model posAsAxial
-                            |> updatePlayerOne
-                          )
-                        , Cmd.none
-                        )
+                        ( (movePlayerTwo model posAsAxial), Cmd.none )
 
                     GameOver ->
                         ( model, Cmd.none )
@@ -132,8 +124,8 @@ placePlayerOne model coord =
             | playerOne =
                 placePlayer coord model.playerOne
             , board = occupyHexagon coord model.board
-            , gameState = updateGameState model
           }
+            |> updateGameState
         , Cmd.none
         )
     else
@@ -150,8 +142,8 @@ placePlayerTwo model coord =
             | playerTwo =
                 placePlayer coord model.playerTwo
             , board = occupyHexagon coord model.board
-            , gameState = updateGameState model
           }
+            |> updateGameState
         , Cmd.none
         )
     else
@@ -203,8 +195,9 @@ movePlayerOne model coord =
                 , board =
                     removePlayerRouteFromBoard model.playerOne coord model.board
                         |> occupyHexagon coord
-                , gameState = updateGameState model
             }
+                |> updatePlayerTwo
+                |> updateGameState
         else
             model
 
@@ -233,8 +226,9 @@ movePlayerTwo model coord =
                 , board =
                     removePlayerRouteFromBoard model.playerTwo coord model.board
                         |> occupyHexagon coord
-                , gameState = updateGameState model
             }
+                |> updatePlayerOne
+                |> updateGameState
         else
             model
 

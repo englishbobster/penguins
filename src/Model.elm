@@ -55,18 +55,18 @@ initialModel =
     }
 
 
-updateGameState : Model -> GameState
+updateGameState : Model -> Model
 updateGameState model =
     if model.gameState == PlayerOnePlacePiece then
-        PlayerTwoPlacePiece
+        { model | gameState = PlayerTwoPlacePiece }
     else if model.gameState == PlayerTwoPlacePiece then
         if ((Array.length model.playerOne.placedPieces) == const.piecesPerPlayer) then
-            PlayerOneMove
+            { model | gameState = PlayerOneMove }
         else
-            PlayerOnePlacePiece
+            { model | gameState = PlayerOnePlacePiece }
     else if model.gameState == PlayerOneMove then
-        PlayerTwoMove
+        { model | gameState = PlayerTwoMove }
     else if model.gameState == PlayerTwoMove then
-        PlayerOneMove
+        { model | gameState = PlayerOneMove }
     else
-        model.gameState
+        model
