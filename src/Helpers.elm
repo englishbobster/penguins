@@ -123,7 +123,7 @@ interpolateRoute start finish distance step currentRoute =
 
             lerp : Float -> Float -> Float
             lerp a b =
-                a + (b - a) * (1 / (toFloat distance)) * step
+                a + (b - a) * (1 / (toFloat distance)) * (toFloat step)
 
             next =
                 ( (lerp (toFloat startx) (toFloat finishx))

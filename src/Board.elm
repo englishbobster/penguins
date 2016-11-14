@@ -83,7 +83,8 @@ generateAllMapKeys maxColumns currentColumn maxRows list =
 
 generateMapKeyListForRow : Int -> Int -> List AxialCoord
 generateMapKeyListForRow colNr maxRows =
-    List.map (\n -> ( colNr, n )) [0..(maxRows - 1)]
+    List.range 0 (maxRows - 1)
+        |> List.map (\n -> ( colNr, n ))
 
 
 timeInSeconds : Time -> Int

@@ -6,6 +6,7 @@ type alias Constants =
     , playerSvgOffset : Float
     , hexSize : Int
     , hexColour : String
+    , hexBorderColour : String
     , hexShrinkFactor : Int
     , playerOneUnselectedImage : String
     , playerTwoUnselectedImage : String
@@ -21,6 +22,7 @@ const =
     , playerSvgOffset = 25
     , hexSize = 55
     , hexColour = "purple"
+    , hexBorderColour = "black"
     , hexShrinkFactor = 5
     , playerOneUnselectedImage = "../graphics/batzmaru.svg"
     , playerTwoUnselectedImage = "../graphics/pengmaru.svg"

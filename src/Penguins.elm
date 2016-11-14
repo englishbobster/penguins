@@ -47,7 +47,7 @@ import Helpers
 import Constants exposing (const)
 import Dict exposing (Dict, empty, insert, filter)
 import Html exposing (Html, div, text, h1)
-import Html.App as App
+import Html
 import Svg exposing (Svg)
 import Svg.Attributes exposing (height, width)
 import String exposing (join)
@@ -69,7 +69,7 @@ type Msg
 
 currentTime : Cmd Msg
 currentTime =
-    perform (\_ -> NoOp) GenerateBoard now
+    perform GenerateBoard now
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -402,7 +402,7 @@ viewPlayerPieces : PlayerModel -> List (Svg Msg)
 viewPlayerPieces player =
     List.map
         (\svgmsg ->
-            App.map PlayerMessage (svgmsg)
+            Html.map PlayerMessage (svgmsg)
         )
         (drawPlayerPieces player)
 
@@ -432,7 +432,7 @@ subscriptions model =
 
 
 main =
-    App.program
+    Html.program
         { init = ( initialModel, currentTime )
         , view = view
         , update = update

@@ -7,7 +7,7 @@ module Hexagon
         )
 
 import String exposing (join)
-import Svg exposing (Svg, svg, text', text, polygon)
+import Svg exposing (Svg, svg, text_, text, polygon)
 import Svg.Attributes exposing (style, points, x, y, fontSize, dy)
 import Constants exposing (const)
 
@@ -30,7 +30,7 @@ type alias HexModel =
 emptyHexagon : HexModel
 emptyHexagon =
     { value = 0
-    , border = "black"
+    , border = const.hexBorderColour
     , colour = const.hexColour
     , size = const.hexSize
     , center = ( 0, 0 )
@@ -74,7 +74,7 @@ hexagonValue center value =
                 )
             ]
     in
-        text' attributeList [ text label ]
+        text_ attributeList [ text label ]
 
 
 hexColour : String -> String -> Svg.Attribute msg
@@ -90,7 +90,7 @@ hexColour colour borderColour =
 
 hexagonPoints : PixelCoord -> Int -> String
 hexagonPoints center size =
-    [0..5]
+    List.range 0 5
         |> List.map (hexagonCorner center size)
         |> List.map (\( x, y ) -> toString (round x) ++ "," ++ toString (round y))
         |> join ","
